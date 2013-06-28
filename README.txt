@@ -31,7 +31,7 @@ Usage Instructions:
 Each Row (1-8) represents an axis on the virtual controller.
 
 Stage 1 - Initial testing
-
+-------------------------
 1) Make sure a joystick is plugged in and Double click ujr.ahk - you should see a GUI.
 2) On the first row of settings, set "Virtual Axis" to 1
 3) Tick the "Manual Control" box at the bottom and then drag the "State" slider in the first row all the way right
@@ -45,15 +45,15 @@ If this works, vJoy is working and you can move on to the next stage
 
 
 Stage 2 - Finding your Joystick ID (You need to find out the ID of your physical Joystick)
-
+------------------------------------------------------------------------------------------
 1) In UJR, Untick the "Manual control" box
 2) Click the "Detect Axis" button, then move an axis on your stick around (As big movements as possible) until a dialog pops up
 3) This will either say it could not detect the stick, or tell you which ID and which axis you moved
 
 
 Stage 3 - Testing physical to virtual stick mapping
+---------------------------------------------------
 Now you know your stick ID and axis number, you can configure the rest of the first row.
-
 1) Set the "Physical Stick ID" column to the ID of the stick and the "Physical Axis" column to the Axis # you got from the detect tool
 2) Move the stick around like you did before, and you should see the slider in that row moving to indicate input
 3) If you get nothing, try repeating the detect process and see if it detects a different stick, or try all stick IDs manually
@@ -62,7 +62,9 @@ Go back to the vJoy device properties in windows and verify physical stick input
 It should move left and right as vJoy axis 1 is the X axis
 5) Move on to the next row, select a different virtual axis, it should be pretty obvious by now.
 
+
 Advanced
+--------
 Axis Merging - Use this to merge two axes on to one.
 eg You have racing pedals where each pedal is a seperate axis and you want to simulate one axis (like a rudder)
 To use, set TWO rows to the SAME "Virtual Axis" and set the "Axis Merging" column to "On" in both rows
