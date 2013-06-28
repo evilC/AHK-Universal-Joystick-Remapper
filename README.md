@@ -7,6 +7,7 @@ evilc@evilc.com
 ===================================== 8< =====================================
 
 Installation Instructions:
+
 1) Make sure Autohotkey_L is installed
 http://l.autohotkey.net/AutoHotkey_L_Install.exe
 You may use any option during the install (eg 32 bit/64 bit/ANSI/Unicode)
@@ -51,6 +52,7 @@ If this works, vJoy is working and you can move on to the next stage
 
 
 Stage 2 - Finding your Joystick ID (You need to find out the ID of your physical Joystick)
+
 1) In UJR, Untick the "Manual control" box
 
 2) Click the "Detect Axis" button, then move an axis on your stick around (As big movements as possible) until a dialog pops up
@@ -60,6 +62,7 @@ Stage 2 - Finding your Joystick ID (You need to find out the ID of your physical
 
 
 Stage 3 - Testing physical to virtual stick mapping
+
 Now you know your stick ID and axis number, you can configure the rest of the first row.
 
 1) Set the "Physical Stick ID" column to the ID of the stick and the "Physical Axis" column to the Axis # you got from the detect tool
