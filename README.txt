@@ -103,6 +103,12 @@ Key:
 = : Change / Fix
 + : Added feature
 
+4.3
++ Basic Hat (POV) switch support.
+As AHK only supports one hat per stick, it is very basic for the moment.
+It currently only supports Continuous POVs.
+Currently there is no "manual control" mode for the hats
+
 4.2
 = Duplicate in profiles was always duplicating the Default profile, no matter what you had selected - fixed.
 + Added Delete Profile button

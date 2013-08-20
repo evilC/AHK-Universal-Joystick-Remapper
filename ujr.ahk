@@ -1,5 +1,5 @@
 ; ujr.ahk - evilC's Universal Joystick Remapper
-version := 4.2
+version := 4.3
 
 ; When the script quits, disconnect the joystick
 OnExit, DisconnectJoystick
@@ -28,6 +28,8 @@ VJoy_Init(vjoy_id)
 manual_control := 0
 virtual_axes := 8
 virtual_buttons := VJoy_GetVJDButtonNumber(vjoy_id)
+;virtual_hats := VJoy_GetContPovNumber(vjoy_id)
+virtual_hats := 1	; AHK currently can only read one hat per stick
 
 ; An array of names AHK uses for axes - used to we can refer to axes by axis number not name
 axis_list_ahk := Array("X","Y","Z","R","U","V")
@@ -40,6 +42,8 @@ axis_list_vjoy := Array("X","Y","Z","RX","RY","RZ","SL0","SL1")
 axis_mapping := Array()
 
 button_mapping := Array()
+
+hat_mapping := Array()
 
 ; When axes are to be merged - the first axis to be processed stores it's value in this array
 ; The second axis can then use the value in here to merge with the first axis
@@ -112,7 +116,7 @@ Gui, Add, Text, x10 y10 W80, Current Profile
 Gui, Add, DropDownList, x105 y5 w100 h20 R7 vcurrent_profile gProfileChanged, Default||%profile_list%
 
 ; TAB HEADINGS
-Gui, Add, Tab2, x5 y35 h390 w%w%, Axes|Buttons 1-8|Buttons 9-16|Buttons 17-24|Buttons 25-32|Profiles
+Gui, Add, Tab2, x5 y35 h390 w%w%, Axes|Buttons 1-8|Buttons 9-16|Buttons 17-24|Buttons 25-32|Hats|Profiles
 
 ; AXES TAB
 Gui, Add, Text, x20 y%th1% w30 R2 Center, Virtual Axis
@@ -166,7 +170,26 @@ Loop, %virtual_buttons% {
 	button_row++
 }
 
+; HATS TAB
+Gui, Tab, Hats
+
+Gui, Add, Text, x20 y%th1% w50 R2 Center, Hat Number
+Gui, Add, Text, x75 y%th1% w60 R2 Center, Physical Stick ID
+;Gui, Add, Text, x135 y%th1% w60 R2 Center, Hat ID
+
+button_row := 1
+ypos := 70 + button_row * 30
+
+Loop, % virtual_hats {
+	Gui, Add, Text, x30 y%ypos% w40 h20 , Hat %A_Index%
+	Gui, Add, DropDownList, x80 y%ypos% w50 h10 R7 vhat_physical_stick_id_%A_Index% gConfigChanged, None||1|2|3|4|5|6|7|8
+	;Gui, Add, DropDownList, x140 y%ypos% w50 h21 R7 vhat_id_%A_Index% gConfigChanged, None||1|2|3|4
+
+	button_row++
+}
+
 Gosub, LoadProfile
+
 
 ; PROFILES TAB
 Gui, Tab, Profiles
@@ -284,6 +307,15 @@ Loop{
 			VJoy_SetBtn(val, vjoy_id, index)
 		}		
 	}
+	
+	For index, value in hat_mapping {
+		if (hat_mapping[index].id != "None"){
+			if (manual_control == 0){
+				VJoy_SetContPov(GetKeyState(value.id . "Joy" . "POV"), vjoy_id, A_Index)
+			}
+		}
+	}
+	
 	Sleep, 10
 }
 
@@ -386,6 +418,13 @@ ConfigChanged:
 			}
 			button_mapping[A_Index].button := button_id_%A_Index%
 			UpdateINI("button_id_"A_Index, current_profile , button_id_%A_Index%, "none", "profiles")
+		}
+		
+		Loop, %virtual_hats% {
+			hat_mapping[A_Index] := Object()
+			
+			hat_mapping[A_Index].id := hat_physical_stick_id_%A_Index%
+			UpdateINI("hat_physical_stick_id_"A_Index, current_profile , hat_physical_stick_id_%A_Index%, "none", "profiles")
 		}
 	}
 	return
@@ -545,6 +584,11 @@ DuplicateProfile:
 		IniRead, val, %tmp%, %editing_profile%, button_id_%A_Index%, None
 		UpdateINI("button_id_"A_Index, new_profile, val, "none", "profiles")
 	}
+	
+	Loop, %virtual_hats% {
+		IniRead, val, %tmp%, %current_profile%, hat_physical_stick_id_%A_Index%, None
+		UpdateINI("hat_physical_stick_id_"A_Index, new_profile, val, "none", "profiles")
+	}
 	return
 	
 DeleteProfile:
@@ -605,6 +649,11 @@ LoadProfile:
 		
 		IniRead, val, %tmp%, %current_profile%, button_id_%A_Index%, None
 		GuiControl, ChooseString, button_id_%A_Index%, %val%
+	}
+	
+	Loop, %virtual_hats% {
+		IniRead, val, %tmp%, %current_profile%, hat_physical_stick_id_%A_Index%, None
+		GuiControl, ChooseString, hat_physical_stick_id_%A_Index%, %val%
 	}
 	ignore_events := 0
 	return
