@@ -96,6 +96,11 @@ Key:
 = : Change / Fix
 + : Added feature
 
+4.3
++ Basic support for Hat (POV) switches in.
+Only "Continuous" hats supported for now.
+Hats have no "Manual Control" mode for now
+
 4.2
 = Duplicate in profiles was always duplicating the Default profile, no matter what you had selected - fixed.
 + Added Delete Profile button
