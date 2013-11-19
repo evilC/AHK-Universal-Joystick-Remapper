@@ -32,7 +32,7 @@ ADHD.config_size(600,500)
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
-ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
+ADHD.config_hotkey_add({uiname: "Test Axis", subroutine: "TestAxis"})
 
 ; Hook into ADHD events
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
@@ -120,6 +120,7 @@ Gui, Add, Text, x380 y%th2% w50 R2 Center, % "Deadzone %"
 Gui, Add, Text, x435 y%th2% w50 R2 Center, % "Sensitivity %"
 Gui, Add, Text, x485 y%th2% w50 h20 Center, Physical
 Gui, Add, Text, x530 y%th2% w40 h20 Center, Virtual
+Gui, Add, Text, x568 y%th2% w20 h20 Center, MC
 
 tmp := 0
 
@@ -167,6 +168,9 @@ Loop, %virtual_buttons% {
 		Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, Button #
 		xpos := xbase + 205
 		Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, State
+		xpos := xbase + 268
+		Gui, Add, Text, x%xpos% y%th2% w20 h20 Center, MC
+
 		button_row = 1
 	}
 	ypos := 70 + button_row * 30
@@ -178,7 +182,6 @@ Loop, %virtual_buttons% {
 	xpos := xbase + 132
 	ADHD.gui_add("DropDownList", "button_id_" A_Index, "x" xpos " y" ypos " w60 h10 R15", "None|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|POV U|POV D|POV L|POV R", "None")
 	xpos := xbase + 220
-	;Gui, Add, Text, x220 y%ypos% w30 h20 vbutton_state_%A_Index% gButtonClicked cred Center, Off
 	Gui, Add, Text, x%xpos% y%ypos% w30 h20 vbutton_state_%A_Index% cred Center, Off
 	button_row++
 }
@@ -232,8 +235,22 @@ Loop, %virtual_buttons% {
 
 Gui, Tab
 
-Gui, Add, Text, x365 y340 Hidden vManualControlLabelAxis, MANUAL CONTROL: Select an Axis here   ^^
-Gui, Add, Text, x60 y340 Hidden vManualControlLabelButtons, MANUAL CONTROL: Select a Button here   ^^                                      OR HERE                                          ^^
+Gui, Add, GroupBox, x5 y355 w585 h105 vManualControlLabelGroup, Manual Control
+		
+Gui, Add, Text, x10 y375 vManualControlLabelDelay, Delay (seconds)
+Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDelay, 1
+
+Gui, Add, Text, x10 y400 vManualControlLabelDuration, Duration (seconds)
+Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDuration, 3
+
+Gui, Add, Text, x10 y425 vManualControlLabelAxisType, Axis movement type
+Gui, Add, DropDownList, xp+100 yp-2 w70 vManualControlAxisType, High-Low||Mid-High|Mid-Low
+
+Gui, Add, Text, x200 y365 vManualControlLabelInstructions, MANUAL CONTROL INSTRUCTIONS:`nIf you find that a game always detects your physical stick instead of the virtual one,`nyou need Manual Control mode.`n1) Select a button or an axis from the "MC" column above.`n2) Choose options on the left (Hover over them to see what they do).`n3) Bind something to "Test Axis" on the Bindings tab.`n4) Go into game, hit the "Test Axis" button, then initiate the game's bind function.
+;When you try to bind your virtual joystick to in-game functions, if you find that when`nyou move the physical stick, the game picks that up, th
+
+
+;Gui, Add, DropDownList, 
 
 ; End GUI creation section
 ; ============================================================================================
@@ -429,19 +446,32 @@ SetButtonState(but,state){
 
 tab_changed_hook(){
 	Global adhd_current_tab
-	if (adhd_current_tab == "Axes"){
-		GuiControl, -Hidden, ManualControlLabelAxis
-		GuiControl, +Hidden, ManualControlLabelButtons
-	} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
-		GuiControl, -Hidden, ManualControlLabelButtons
-		GuiControl, +Hidden, ManualControlLabelAxis
-	} else if (adhd_current_tab == "Hats"){
-		GuiControl, +Hidden, ManualControlLabelButtons
-		GuiControl, +Hidden, ManualControlLabelAxis
-	} else {
-		GuiControl, +Hidden, ManualControlLabelButtons
-		GuiControl, +Hidden, ManualControlLabelAxis
+	
+	GuiControl, +Hidden, ManualControlLabelGroup
+	GuiControl, +Hidden, ManualControlLabelDelay
+	GuiControl, +Hidden, ManualControlDelay
+	GuiControl, +Hidden, ManualControlDelay
+	GuiControl, +Hidden, ManualControlLabelDuration
+	GuiControl, +Hidden, ManualControlDuration
+	GuiControl, +Hidden, ManualControlLabelAxisType
+	GuiControl, +Hidden, ManualControlAxisType
+	GuiControl, +Hidden, ManualControlLabelInstructions
 
+	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
+		GuiControl, -Hidden, ManualControlLabelGroup
+		GuiControl, -Hidden, ManualControlLabelDelay
+		GuiControl, -Hidden, ManualControlDelay
+		GuiControl, -Hidden, ManualControlLabelDuration
+		GuiControl, -Hidden, ManualControlDuration
+		GuiControl, -Hidden, ManualControlLabelInstructions
+		if (adhd_current_tab == "Axes"){
+			GuiControl, -Hidden, ManualControlLabelAxisType
+			GuiControl, -Hidden, ManualControlAxisType
+		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
+		
+		} else if (adhd_current_tab == "Hats"){
+		
+		}
 	}
 }
 
@@ -514,8 +544,8 @@ option_changed_hook(){
 ; ACTIONS
 
 
-; Macro is trying to fire - timer label
-Fire:
+; Manual Control triggered
+TestAxis:
 	return
 
 ; ===================================================================================================
