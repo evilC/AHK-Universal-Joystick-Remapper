@@ -148,7 +148,7 @@ Loop, %virtual_axes% {
 	ADHD.gui_add("Edit", "virtual_axis_deadzone_" A_Index, "x385 y" ypos " w40 h21", "", 0)
 	virtual_axis_deadzone_%A_Index%_TT := "Applies a deadzone to this axis"
 	
-	ADHD.gui_add("Edit", "virtual_axis_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 0)
+	ADHD.gui_add("Edit", "virtual_axis_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 100)
 	virtual_axis_sensitivity_%A_Index%_TT := "Adjusts sensitivity of this axis"
 	
 	Gui, Add, Text, x490 y%ypos% w40 h21 Center vphysical_value_%A_Index%, 0
@@ -206,6 +206,36 @@ Loop, %virtual_buttons% {
 	button_row++
 }
 
+; HATS TAB
+; --------
+
+Gui, Tab, 4
+
+Gui, Add, Text, x20 y%th1% w50 R2 Center, Hat Number
+Gui, Add, Text, x75 y%th1% w60 R2 Center, Physical Stick ID
+;Gui, Add, Text, x135 y%th1% w60 R2 Center, Hat ID
+
+button_row := 1
+ypos := 70 + button_row * 30
+ypos2 := ypos -3
+
+Loop, % virtual_hats {
+	Gui, Add, Text, x30 y%ypos% w40 h20 , Hat %A_Index%
+	ADHD.gui_add("DropDownList", "hat_physical_stick_id_" A_Index, "x80 y" ypos " w50 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
+
+	Gui, Add, Text, x248 y60, MC
+	
+	Gui, Add, Text, x200 y100, Up
+
+	Gui, Add, Text, x200 y120, Down
+
+	Gui, Add, Text, x200 y140, Left
+
+	Gui, Add, Text, x200 y160, Right
+	
+	button_row++
+}
+
 ; MANUAL CONTROL RADIOS
 ; ---------------------
 ; AHK cannot group radios if they are interspersed with other controls, so add them all in one go here.
@@ -250,6 +280,18 @@ Loop, %virtual_buttons% {
 	button_row++
 }
 
+Gui, Tab, 4
+
+Loop, %virtual_hats% {
+	; Create Manual Control menu for U/D/L/R
+	grp := " vManualControlHats"
+	
+	Gui, Add, Radio, x250 y100%grp%
+	Gui, Add, Radio, x250 y120
+	Gui, Add, Radio, x250 y140
+	Gui, Add, Radio, x250 y160
+}
+
 ; MANUAL CONTROL FOOTER
 ; ---------------------
 
@@ -262,7 +304,7 @@ Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDelay, 1
 ManualControlDelay_TT := "The amount of time between you hitting the Test Axis binding,`nand Manual Control starting to manipulate the axis or button"
 
 Gui, Add, Text, x10 y400 vManualControlLabelDuration, Duration (seconds)
-Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDuration, 3
+Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDuration, 1
 ManualControlDuration_TT := "The amount of time that Manual Control moves the axis or holds the button"
 
 Gui, Add, Text, x10 y425 vManualControlLabelAxisType, Axis movement type
@@ -270,10 +312,6 @@ Gui, Add, DropDownList, xp+100 yp-2 w70 vManualControlAxisType, High-Low||Mid-Hi
 ManualControlAxisType_TT := "How Manual Control moves the axis.`n`nMid-High just moves up.`nMid-Low just moves down.`nHigh-Low moves to both ends"
 
 Gui, Add, Text, x200 y365 vManualControlLabelInstructions, MANUAL CONTROL INSTRUCTIONS:`nIf you find that a game always detects your physical stick instead of the virtual one,`nyou need Manual Control mode.`n1) Select a button or an axis from the "MC" column above.`n2) Choose options on the left (Hover over them to see what they do).`n3) Bind something to "Test Axis" on the Bindings tab.`n4) Go into game, hit the "Test Axis" button, then initiate the game's bind function.
-;When you try to bind your virtual joystick to in-game functions, if you find that when`nyou move the physical stick, the game picks that up, th
-
-
-;Gui, Add, DropDownList, 
 
 ; End GUI creation section
 ; ============================================================================================
