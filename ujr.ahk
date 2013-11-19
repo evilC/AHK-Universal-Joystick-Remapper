@@ -37,12 +37,13 @@ ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
 ; Hook into ADHD events
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
 ADHD.config_event("option_changed", "option_changed_hook")
-ADHD.config_event("program_mode_on", "program_mode_on_hook")
-ADHD.config_event("program_mode_off", "program_mode_off_hook")
-ADHD.config_event("app_active", "app_active_hook")
-ADHD.config_event("app_inactive", "app_inactive_hook")
-ADHD.config_event("disable_timers", "disable_timers_hook")
-ADHD.config_event("resolution_changed", "resolution_changed_hook")
+ADHD.config_event("tab_changed", "tab_changed_hook")
+;ADHD.config_event("program_mode_on", "program_mode_on_hook")
+;ADHD.config_event("program_mode_off", "program_mode_off_hook")
+;ADHD.config_event("app_active", "app_active_hook")
+;ADHD.config_event("app_inactive", "app_inactive_hook")
+;ADHD.config_event("disable_timers", "disable_timers_hook")
+;ADHD.config_event("resolution_changed", "resolution_changed_hook")
 
 ; Add custom tabs
 ADHD.tab_list := Array("Axes", "Buttons 1", "Buttons 2", "Hats")
@@ -118,8 +119,11 @@ Gui, Add, Text, x335 y%th2% w40 h20 Center, Invert
 Gui, Add, Text, x380 y%th2% w50 R2 Center, % "Deadzone %"
 Gui, Add, Text, x435 y%th2% w50 R2 Center, % "Sensitivity %"
 Gui, Add, Text, x485 y%th2% w50 h20 Center, Physical
-Gui, Add, Text, x540 y%th2% w50 h20 Center, Virtual
+Gui, Add, Text, x530 y%th2% w40 h20 Center, Virtual
 
+tmp := 0
+
+Gui, Add, GroupBox, x5 y30 w585 h310,
 Loop, %virtual_axes% {
 	ypos := 70 + A_Index * 30
 	ypos2 := ypos + 5
@@ -132,7 +136,7 @@ Loop, %virtual_axes% {
 	ADHD.gui_add("Edit", "virtual_axis_deadzone_" A_Index, "x385 y" ypos " w40 h21", "", 0)
 	ADHD.gui_add("Edit", "virtual_axis_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 0)
 	Gui, Add, Text, x490 y%ypos% w40 h21 Center vphysical_value_%A_Index%, 0
-	Gui, Add, Text, x540 y%ypos% w40 h21 Center vvirtual_value_%A_Index%, 0
+	Gui, Add, Text, x530 y%ypos% w40 h21 Center vvirtual_value_%A_Index%, 0
 }
 
 ; BUTTONS TAB
@@ -149,8 +153,11 @@ Loop, %virtual_buttons% {
 			button_column := 1
 			button_tab++
 		}
-		
+
 		Gui, Tab, %button_tab%
+		xpos := 5 + ((button_column - 1) * 295)
+		Gui, Add, GroupBox, x%xpos% y30 w290 h310,
+		
 		xbase := ((button_column - 1) * 300)
 		xpos := xbase + 20
 		Gui, Add, Text, x%xpos% y%th1% w20 R2 Center, Virt Btn
@@ -174,13 +181,67 @@ Loop, %virtual_buttons% {
 	;Gui, Add, Text, x220 y%ypos% w30 h20 vbutton_state_%A_Index% gButtonClicked cred Center, Off
 	Gui, Add, Text, x%xpos% y%ypos% w30 h20 vbutton_state_%A_Index% cred Center, Off
 	button_row++
-	
 }
+
+; MANUAL CONTROL RADIOS
+; ---------------------
+; AHK cannot group radios if they are interspersed with other controls, so add them all in one go here.
+
+Gui, Tab, 1
+
+xpos := 560
+Loop, %virtual_axes% {
+	ypos := 70 + A_Index * 30
+	ypos2 := ypos + 5
+	tmp := "x" xpos " y" ypos " w25 Right"
+	if (A_Index == 1){
+		tmp := tmp " vManualControlAxes Checked"
+	}
+	Gui, Add, Radio, %tmp%
+}
+
+button_tab := 2
+button_row := 1
+button_column := 0
+
+Loop, %virtual_buttons% {
+	if (Mod(A_Index,8) == 1){
+		button_column++
+		if (button_column == 3){
+			button_column := 1
+			button_tab++
+		}
+		Gui, Tab, %button_tab%
+		xbase := ((button_column - 1) * 300)
+		button_row := 1
+	}
+	ypos := 70 + button_row * 30
+	ypos2 := ypos + 5
+	xpos := xbase + 260
+	
+	tmp := "x" xpos " y" ypos " w25 Right"
+	if (A_Index == 1 || A_Index == 17){
+		tmp := tmp " vManualControlButtons" button_tab-1 " Checked"
+	}
+	Gui, Add, Radio, %tmp%
+	button_row++
+}
+
+; MANUAL CONTROL FOOTER
+; ---------------------
+
+Gui, Tab
+
+Gui, Add, Text, x365 y340 Hidden vManualControlLabelAxis, MANUAL CONTROL: Select an Axis here   ^^
+Gui, Add, Text, x60 y340 Hidden vManualControlLabelButtons, MANUAL CONTROL: Select a Button here   ^^                                      OR HERE                                          ^^
 
 ; End GUI creation section
 ; ============================================================================================
 
 ADHD.finish_startup()
+
+; Fire tab changed at startup to init common portion
+tab_changed_hook()
 
 ; =============================================================================================================================
 ; MAIN LOOP - controls the virtual stick
@@ -365,6 +426,24 @@ SetButtonState(but,state){
 
 ; ============================================================================================
 ; EVENT HOOKS
+
+tab_changed_hook(){
+	Global adhd_current_tab
+	if (adhd_current_tab == "Axes"){
+		GuiControl, -Hidden, ManualControlLabelAxis
+		GuiControl, +Hidden, ManualControlLabelButtons
+	} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
+		GuiControl, -Hidden, ManualControlLabelButtons
+		GuiControl, +Hidden, ManualControlLabelAxis
+	} else if (adhd_current_tab == "Hats"){
+		GuiControl, +Hidden, ManualControlLabelButtons
+		GuiControl, +Hidden, ManualControlLabelAxis
+	} else {
+		GuiControl, +Hidden, ManualControlLabelButtons
+		GuiControl, +Hidden, ManualControlLabelAxis
+
+	}
+}
 
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 option_changed_hook(){
