@@ -135,6 +135,48 @@ Loop, %virtual_axes% {
 	Gui, Add, Text, x540 y%ypos% w40 h21 Center vvirtual_value_%A_Index%, 0
 }
 
+; BUTTONS TAB
+; -----------
+
+button_tab := 2
+button_row := 1
+button_column := 0
+
+Loop, %virtual_buttons% {
+	if (Mod(A_Index,8) == 1){
+		button_column++
+		if (button_column == 3){
+			button_column := 1
+			button_tab++
+		}
+		
+		Gui, Tab, %button_tab%
+		xbase := ((button_column - 1) * 300)
+		xpos := xbase + 20
+		Gui, Add, Text, x%xpos% y%th1% w20 R2 Center, Virt Btn
+		xpos := xbase + 62
+		Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, Stick ID
+		xpos := xbase + 132
+		Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, Button #
+		xpos := xbase + 205
+		Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, State
+		button_row = 1
+	}
+	ypos := 70 + button_row * 30
+	ypos2 := ypos + 5
+	xpos := xbase + 25
+	Gui, Add, Text, x%xpos% y%ypos2% w40 h20 , %A_Index%
+	xpos := xbase + 62
+	ADHD.gui_add("DropDownList", "button_physical_stick_id_" A_Index, "x" xpos " y" ypos " w60 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
+	xpos := xbase + 132
+	ADHD.gui_add("DropDownList", "button_id_" A_Index, "x" xpos " y" ypos " w60 h10 R15", "None|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|POV U|POV D|POV L|POV R", "None")
+	xpos := xbase + 220
+	;Gui, Add, Text, x220 y%ypos% w30 h20 vbutton_state_%A_Index% gButtonClicked cred Center, Off
+	Gui, Add, Text, x%xpos% y%ypos% w30 h20 vbutton_state_%A_Index% cred Center, Off
+	button_row++
+	
+}
+
 ; End GUI creation section
 ; ============================================================================================
 
@@ -196,7 +238,6 @@ Loop{
 		
 	}
 	
-	/*
 	For index, value in button_mapping {
 		if (button_mapping[index].id != "None" && button_mapping[index].button != "None"){
 			if (manual_control == 0){
@@ -229,7 +270,6 @@ Loop{
 			}
 		}
 	}
-	*/
 	Sleep, 10
 }
 return
@@ -278,6 +318,50 @@ sign(input){
 	}
 }
 
+; Converts an AHK POV (degrees style) value to 0-7 (0 being up, going clockwise)
+PovToAngle(pov){
+	if (pov == -1){
+		return -1
+	} else {
+		return round(pov/4500)
+	}
+}
+
+; Calculates whether a u/d/l/r value matches a pov (0-7) value
+; eg Up ("u") is pov angle 0, but pov 7 (up left) and 1 (up right) also mean "up" is held
+PovMatchesAngle(pov,angle){
+	; pov = 0-7 or -1
+	; angle = u,d,l,r or -1
+	if (angle == "u"){
+		if (pov == 7 || pov == 0 || pov == 1){
+			return 1
+		}
+	} else if (angle == "d"){
+		if (pov >= 3 && pov <= 5){
+			return 1
+		}	
+	} else if (angle == "l"){
+		if (pov >= 5 && pov <= 7){
+			return 1
+		}
+	} else if (angle == "r"){
+		if (pov >= 1 && pov <= 3){
+			return 1
+		}
+	}
+	return 0
+}
+
+; Changes display to reflect the state of a button
+SetButtonState(but,state){
+	if (state == 1){
+		GuiControl, +cgreen, button_state_%but%
+		GuiControl,, button_state_%but%, On
+	} else {
+		GuiControl, +cred, button_state_%but%
+		GuiControl,,button_state_%but%, Off
+	}
+}
 
 ; ============================================================================================
 ; EVENT HOOKS
@@ -285,8 +369,14 @@ sign(input){
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 option_changed_hook(){
 	Global virtual_axes
-	Global axis_mapping
+	Global virtual_buttons
+	Global virtual_hats
 	
+	Global axis_mapping
+	Global button_mapping
+	Global hat_mapping
+	
+	; Build arrays for main loop
 	Loop, %virtual_axes% {
 		axis_mapping[A_Index] := Object()
 		
@@ -314,6 +404,28 @@ option_changed_hook(){
 			GuiControl,,virtual_axis_sensitivity_%A_Index%,100
 		else
 			axis_mapping[A_Index].sensitivity := virtual_axis_sensitivity_%A_Index%
+	}
+
+	Loop, %virtual_buttons% {
+		button_mapping[A_Index] := Object()
+		
+		button_mapping[A_Index].id := button_physical_stick_id_%A_Index%
+		
+		tmp := instr(button_id_%A_Index%,"POV ")
+		if (tmp > 0){
+			tmp := SubStr(button_id_%A_Index%, 5) 
+			StringLower, tmp, tmp
+			button_mapping[A_Index].pov := tmp
+		} else {
+			button_mapping[A_Index].pov := 0			
+		}
+		button_mapping[A_Index].button := button_id_%A_Index%
+	}
+	
+	Loop, %virtual_hats% {
+		hat_mapping[A_Index] := Object()
+		
+		hat_mapping[A_Index].id := hat_physical_stick_id_%A_Index%
 	}
 	
 	return
