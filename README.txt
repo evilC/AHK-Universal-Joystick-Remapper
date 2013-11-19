@@ -96,6 +96,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+5.0
+* Rewrite using the ADHD library
+
 4.3
 + Basic Hat (POV) switch support.
 As AHK only supports one hat per stick, it is very basic for the moment.
