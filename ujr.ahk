@@ -129,13 +129,28 @@ Loop, %virtual_axes% {
 	ypos := 70 + A_Index * 30
 	ypos2 := ypos + 5
 	ADHD.gui_add("DropDownList", "virtual_axis_id_" A_Index, "x10 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+	virtual_axis_id_%A_Index%_TT := "Makes this row map to the selected virtual axis"
+	
 	ADHD.gui_add("DropDownList", "virtual_axis_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
+	
 	ADHD.gui_add("DropDownList", "axis_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+	axis_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
+	
 	ADHD.gui_add("DropDownList", "physical_axis_id_" A_Index, "x190 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+	physical_axis_id_%A_Index%_TT := "Selects which axis to use on the selected physical stick"
+	
 	Gui, Add, Slider, x240 y%ypos% w100 h20 vaxis_state_slider_%A_Index%
+	axis_state_slider_%A_Index%_TT := "Shows the state of this axis"
+	
 	ADHD.gui_add("CheckBox", "virtual_axis_invert_" A_Index, "x345 y" ypos " w20 h20", "", 0)
+	virtual_axis_invert_%A_Index%_TT := "Inverts this axis"
+	
 	ADHD.gui_add("Edit", "virtual_axis_deadzone_" A_Index, "x385 y" ypos " w40 h21", "", 0)
+	virtual_axis_deadzone_%A_Index%_TT := "Applies a deadzone to this axis"
+	
 	ADHD.gui_add("Edit", "virtual_axis_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 0)
+	virtual_axis_sensitivity_%A_Index%_TT := "Adjusts sensitivity of this axis"
+	
 	Gui, Add, Text, x490 y%ypos% w40 h21 Center vphysical_value_%A_Index%, 0
 	Gui, Add, Text, x530 y%ypos% w40 h21 Center vvirtual_value_%A_Index%, 0
 }
@@ -177,10 +192,15 @@ Loop, %virtual_buttons% {
 	ypos2 := ypos + 5
 	xpos := xbase + 25
 	Gui, Add, Text, x%xpos% y%ypos2% w40 h20 , %A_Index%
+	
 	xpos := xbase + 62
 	ADHD.gui_add("DropDownList", "button_physical_stick_id_" A_Index, "x" xpos " y" ypos " w60 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
+	button_physical_stick_id_%A_Index%_TT := "Select the physical stick for this button"
+	
 	xpos := xbase + 132
 	ADHD.gui_add("DropDownList", "button_id_" A_Index, "x" xpos " y" ypos " w60 h10 R15", "None|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|POV U|POV D|POV L|POV R", "None")
+	button_id_%A_Index%_TT := "Select the button to use from the selected physical stick for this button"
+	
 	xpos := xbase + 220
 	Gui, Add, Text, x%xpos% y%ypos% w30 h20 vbutton_state_%A_Index% cred Center, Off
 	button_row++
@@ -239,12 +259,15 @@ Gui, Add, GroupBox, x5 y355 w585 h105 vManualControlLabelGroup, Manual Control
 		
 Gui, Add, Text, x10 y375 vManualControlLabelDelay, Delay (seconds)
 Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDelay, 1
+ManualControlDelay_TT := "The amount of time between you hitting the Test Axis binding,`nand Manual Control starting to manipulate the axis or button"
 
 Gui, Add, Text, x10 y400 vManualControlLabelDuration, Duration (seconds)
 Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDuration, 3
+ManualControlDuration_TT := "The amount of time that Manual Control moves the axis or holds the button"
 
 Gui, Add, Text, x10 y425 vManualControlLabelAxisType, Axis movement type
 Gui, Add, DropDownList, xp+100 yp-2 w70 vManualControlAxisType, High-Low||Mid-High|Mid-Low
+ManualControlAxisType_TT := "How Manual Control moves the axis.`n`nMid-High just moves up.`nMid-Low just moves down.`nHigh-Low moves to both ends"
 
 Gui, Add, Text, x200 y365 vManualControlLabelInstructions, MANUAL CONTROL INSTRUCTIONS:`nIf you find that a game always detects your physical stick instead of the virtual one,`nyou need Manual Control mode.`n1) Select a button or an axis from the "MC" column above.`n2) Choose options on the left (Hover over them to see what they do).`n3) Bind something to "Test Axis" on the Bindings tab.`n4) Go into game, hit the "Test Axis" button, then initiate the game's bind function.
 ;When you try to bind your virtual joystick to in-game functions, if you find that when`nyou move the physical stick, the game picks that up, th
