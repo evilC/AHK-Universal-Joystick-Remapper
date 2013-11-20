@@ -622,8 +622,21 @@ TestAxis:
 	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
 		manual_control := 1
 
-		del := ManualControlDelay * 1000
-		Sleep, %del%
+		; set all configured axes to neutral position
+		For index, value in axis_mapping {
+			axismap := axis_list_vjoy[value.virt_axis]
+			if (axismap != ""){
+				GuiControl,,axis_state_slider_%index%,50
+				VJoy_SetAxis(16384, vjoy_id, HID_USAGE_%axismap%)
+			}
+		}
+		
+		; Set all configured buttons to off
+		
+		
+		; Set all configured hats to neutral position
+		
+		Sleep, % ManualControlDelay * 1000
 
 		if (adhd_current_tab == "Axes"){
 			
