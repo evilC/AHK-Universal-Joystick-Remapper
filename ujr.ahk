@@ -633,16 +633,22 @@ TestAxis:
 		
 		; Set all configured buttons to off
 		
+		Loop, % virtual_buttons {
+			SetButtonState(A_Index,0)
+			VJoy_SetBtn(0, vjoy_id, A_Index)
+		}
 		
 		; Set all configured hats to neutral position
 		
+		
+		; Wait for user to click bind in game
 		Sleep, % ManualControlDelay * 1000
 
 		if (adhd_current_tab == "Axes"){
-			
+
+			; Check axis is mapped
 			value := axis_mapping[ManualControlAxes]
 			axismap := axis_list_vjoy[value.virt_axis]
-			
 			if (axismap == ""){
 				return
 			}
@@ -675,6 +681,25 @@ TestAxis:
 				Sleep, % (ManualControlDuration * 1000 ) / 2
 			}
 		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
+			; Check button is mapped
+			if (adhd_current_tab == "Buttons 1"){
+				btn_id := 0
+				btn_group := 1
+			} else {
+				btn_id := 16
+				btn_group := 2
+			}
+			btn_id += ManualControlButtons%btn_group%
+			soundbeep
+
+			SetButtonState(btn_id,1)
+			VJoy_SetBtn(1, vjoy_id, btn_id)
+			
+			Sleep, % ManualControlDuration * 1000
+			
+			SetButtonState(btn_id,0)
+			VJoy_SetBtn(0, vjoy_id, btn_id)
+			
 			
 		} else if (adhd_current_tab == "Hats"){
 			
