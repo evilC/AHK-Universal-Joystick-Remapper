@@ -9,8 +9,6 @@
 
 ; Make QuickBind settings persistent? Per-Profile?
 
-; Code ADHD Update Notification system before release
-
 ; Previous / Next QuickBind bindings
 
 ; Previous / Next Tab bindings
@@ -19,6 +17,9 @@
 
 ; Auto-map function - specify a stick ID and it configures the profile straight through
 ; No undo in ADHD - warn this is destructive!
+
+; Optimize main loop
+; Less conversion of scales, ?set all axes at same time?
 
 #SingleInstance On
 
@@ -41,13 +42,16 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "5.0 BETA 1", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "5.0", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ;ADHD.config_default_app("CryENGINE")
 
 ; GUI size
 ADHD.config_size(600,500)
+
+; Configure update notifications:
+ADHD.config_updates("http://evilc.com/files/ahk/vjoy/ujr.au.txt")
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
