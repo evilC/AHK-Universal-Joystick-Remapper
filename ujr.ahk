@@ -38,6 +38,7 @@ ADHD.config_hotkey_add({uiname: "Test Axis", subroutine: "TestAxis"})
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
 ADHD.config_event("option_changed", "option_changed_hook")
 ADHD.config_event("tab_changed", "tab_changed_hook")
+ADHD.config_event("on_exit", "on_exit_hook")
 ;ADHD.config_event("program_mode_on", "program_mode_on_hook")
 ;ADHD.config_event("program_mode_off", "program_mode_off_hook")
 ;ADHD.config_event("app_active", "app_active_hook")
@@ -601,12 +602,43 @@ option_changed_hook(){
 	return
 }
 
+on_exit_hook(){
+	; Disconnect the joystick on exit
+	VJoy_Close()
+	return
+}
+
 ; ============================================================================================
 ; ACTIONS
 
 
 ; Manual Control triggered
 TestAxis:
+
+	; Work out what control we need to manipulate
+	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
+		manual_control := 1
+		
+		del := ManualControlDelay * 1000
+		Sleep, %del%
+
+		soundbeep
+
+		if (adhd_current_tab == "Axes"){
+			
+		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
+			
+		} else if (adhd_current_tab == "Hats"){
+			
+		}
+		
+		dur := ManualControlDuration * 1000
+		Sleep, %dur%
+		
+		manual_control := 0
+		
+	}
+
 	return
 
 ; ===================================================================================================
