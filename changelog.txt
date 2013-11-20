@@ -1,0 +1,98 @@
+UJR Changelog
+
+Key:
+! : Warning
+* : Comment
+= : Change / Fix
++ : Added feature
+
+5.0 20th Nov 2013
+* Rewrite using my ADHD library.
+! Now intended to be used when compiled to an EXE - You no longer need AutoHotkey installed.
+! Old profile files are NOT COMPATIBLE.
+  However, it is just the groups etc in the INI that will not work right.
+  If you create a new profile, exit UJR and paste in the contents of the old profile, it may well work.
+= Manual Control is gone, replaced by QuickBind
+= Profile support improved
+= Less tabs
+= Improved hat switch support (QuickBind supports hats, whereas Manual Control did not)
+= Detect Axis gone for now, it will probably return
+
+4.3
++ Basic Hat (POV) switch support.
+As AHK only supports one hat per stick, it is very basic for the moment.
+It currently only supports Continuous POVs.
+Currently there is no "manual control" mode for the hats
+
+4.2
+= Duplicate in profiles was always duplicating the Default profile, no matter what you had selected - fixed.
++ Added Delete Profile button
+
+4.1
++ Duplicate profile added.
+
+4.0
++ Profile support added.
+INI file format changed, there are now two INI files - one for misc settings, one for profiles
+Existing mappings are kept and moved to the default profile
+Manual profile switching only for now...
+
+3.2
++ The first physical POV Hat can now be mapped to virtual buttons. AHK only supports reading one POV :(
+
+3.1
++ Sensitivity option for each axis.
+
+3.0
+! Please note that the format of the config file has changed, the program will back your old one up
+= Fixed bug stopping button mappings not saving
+= Improved UI layout, labels etc
+= Major cleanup of code - now much more understandable
++ GUI position now saved in config file - when you close the app, next time you reopen it, it will be in the same place on your desktop
++ Only settings changed from their default setting are stored in the config file
++ Detect axis button! Use this to try and find out the stick ID of a physical stick.
+Instructions now simplified
++ Experimental - Merging of axes
+eg Merge two pedal axes into a rudder axis
+
+
+2.3
++ Much improved deadzone code
+  So with a 50% deadzone, if you move to 50 on an axis, it will be dead, but moving to 51 now outputs 1 rather than 51
++ Deadzone is now a text input field, so you can use any value you like
++ Input / Output slider renamed to "State"
++ Input and Output values for axes now displayed
++ Much more commented code
+
+2.2
++ Added per-axis deadzone settings. Just 5,10,20,30,40,50,60,70 or 80 percent at the moment but I intend to allow any figure in a future version
+
+2.1
+= Fixed bug stopping UJR from working on 64-bit AHK installs.
+= Fixed bug stopping mapping of virtual axis 4 or greater
++ 32 Buttons listed for physical joystick
+
+2.0
++ Now uses Axlar's vJoy library (http://www.autohotkey.com/board/topic/87690-using-ahk-to-control-vjoy)
++ Now uses vJoy 2.x - Support for up to 32 buttons
+You will NEED to uninstall vJoy 1.x and install 2.x to use this version
+
+1.1
+= Code for button testing no longer has one subroutine per button
+= Optimised technique for inverting axes - thanks Babba on AHK forums!
+
+1.0
+* Fully functional basic version!
+= Fixed bug stopping invert working in Manual Control mode
++ Button mapping in
+
+0.3
++ Settings now saved in an INI file
+
+0.2
++ All 8 axes now mappable
++ Code optimisations
+
+0.1
+* Initial Proof of concept
+
