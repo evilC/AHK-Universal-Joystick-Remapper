@@ -3,6 +3,8 @@
 ; ToDo:
 ; =====
 ; Remove Axis Merging? Limited use, waste of space.
+; Replace / Add axis splitting? Move to right of Physical Axis?
+
 ; Also remove virtual axis dropdown? Some change of code to check if stick id + axis set. More robust?
 
 ; Make QuickBind settings persistent? Per-Profile?
