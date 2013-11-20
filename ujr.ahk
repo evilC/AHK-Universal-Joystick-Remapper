@@ -79,6 +79,10 @@ axis_list_ahk := Array("X","Y","Z","R","U","V")
 
 ; Init stick vars for vJoy
 axis_list_vjoy := Array("X","Y","Z","RX","RY","RZ","SL0","SL1")
+
+; The order in which the state buttons for the hat
+hat_axes := Array("u","d","l","r")
+
 quick_bind_mode := 0
 virtual_axes := 8
 virtual_buttons := VJoy_GetVJDButtonNumber(vjoy_id)
@@ -225,15 +229,21 @@ Loop, % virtual_hats {
 	Gui, Add, Text, x30 y%ypos% w40 h20 , Hat %A_Index%
 	ADHD.gui_add("DropDownList", "hat_physical_stick_id_" A_Index, "x80 y" ypos " w50 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
 
-	Gui, Add, Text, x248 y60, QB
+	Gui, Add, Text, x150 y%th2% w40 Center, Direction
+	Gui, Add, Text, x205 yp Center, State
+	Gui, Add, Text, x248 yp Center, QB
 	
-	Gui, Add, Text, x200 y100, Up
+	Gui, Add, Text, x150 y100 w40 Center, Up
+	Gui, Add, Text, x205 yp w30 h20 vhat_state_1 cred Center, Off
 
-	Gui, Add, Text, x200 y120, Down
+	Gui, Add, Text, x150 y120 w40 Center, Down
+	Gui, Add, Text, x205 yp w30 h20 vhat_state_2 cred Center, Off
 
-	Gui, Add, Text, x200 y140, Left
+	Gui, Add, Text, x150 y140 w40 Center, Left
+	Gui, Add, Text, x205 yp w30 h20 vhat_state_3 cred Center, Off
 
-	Gui, Add, Text, x200 y160, Right
+	Gui, Add, Text, x150 y160 w40 Center, Right
+	Gui, Add, Text, x205 yp w30 h20 vhat_state_4 cred Center, Off
 	
 	button_row++
 }
@@ -286,12 +296,12 @@ Gui, Tab, 4
 
 Loop, %virtual_hats% {
 	; Create QuickBind menu for U/D/L/R
-	grp := " vQuickBindHats gQuickBindOptionChanged"
+	grp := " vQuickBindHats Checked"
 	
-	Gui, Add, Radio, x250 y100%grp%
-	Gui, Add, Radio, x250 y120
-	Gui, Add, Radio, x250 y140
-	Gui, Add, Radio, x250 y160
+	Gui, Add, Radio, x250 y100 gQuickBindOptionChanged%grp%
+	Gui, Add, Radio, x250 y120 gQuickBindOptionChanged
+	Gui, Add, Radio, x250 y140 gQuickBindOptionChanged
+	Gui, Add, Radio, x250 y160 gQuickBindOptionChanged
 }
 
 ; QUICKBIND FOOTER
@@ -410,7 +420,15 @@ Loop{
 		For index, value in hat_mapping {
 			if (hat_mapping[index].id != "None"){
 				if (quick_bind_mode == 0){
-					VJoy_SetContPov(GetKeyState(value.id . "Joy" . "POV"), vjoy_id, A_Index)
+					val := GetKeyState(value.id . "Joy" . "POV")
+					Loop, 4 {
+						if (PovMatchesAngle(PovToAngle(val), hat_axes[A_Index])){
+							SetHatState(A_Index,1)
+						} else {
+							SetHatState(A_Index,0)
+						}
+					}
+					VJoy_SetContPov(val, vjoy_id, A_Index)
 				}
 			}
 		}
@@ -497,6 +515,23 @@ PovMatchesAngle(pov,angle){
 	return 0
 }
 
+; Converts a hat index (1,2,3,4 - representing u,d,l,r) to a POV (9000 per 90 degrees going clockwise from up)
+HatIndexToPov(angle){
+	if (angle == 1){
+		return 0
+	} else if (angle == 2) {
+		return 18000
+	} else if (angle == 3){
+		return 27000
+	} else if (angle == 4){
+		return 9000
+	} else {
+		return -1
+	}
+}
+
+
+
 ; Changes display to reflect the state of a button
 SetButtonState(but,state){
 	if (state == 1){
@@ -505,6 +540,17 @@ SetButtonState(but,state){
 	} else {
 		GuiControl, +cred, button_state_%but%
 		GuiControl,,button_state_%but%, Off
+	}
+}
+
+; Changes display to reflect the state of a hat
+SetHatState(hat,state){
+	if (state == 1){
+		GuiControl, +cgreen, hat_state_%hat%
+		GuiControl,, hat_state_%hat%, On
+	} else {
+		GuiControl, +cred, hat_state_%hat%
+		GuiControl,,hat_state_%hat%, Off
 	}
 }
 
@@ -647,6 +693,10 @@ QuickBind:
 		}
 		
 		; Set all configured hats to neutral position
+		Loop, 4 {
+			SetHatState(A_Index,0)
+		}
+		VJoy_SetContPov(-1, vjoy_id, 1)
 		
 		
 		; Wait for user to click bind in game
@@ -710,7 +760,10 @@ QuickBind:
 			
 			
 		} else if (adhd_current_tab == "Hats"){
-			
+			soundbeep
+			SetHatState(QuickBindHats,1)
+			VJoy_SetContPov(HatIndexToPov(QuickBindHats), vjoy_id, 1)
+			Sleep, % QuickBindDuration * 1000
 		}
 		
 		quick_bind_mode := 0
