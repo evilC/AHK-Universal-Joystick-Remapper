@@ -32,7 +32,8 @@ ADHD.config_size(600,500)
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
-ADHD.config_hotkey_add({uiname: "Test Axis", subroutine: "TestAxis"})
+ADHD.config_hotkey_add({uiname: "QuickBind", subroutine: "QuickBind"})
+adhd_hk_k_1_TT := "Trigger QuickBind"
 
 ; Hook into ADHD events
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
@@ -78,7 +79,7 @@ axis_list_ahk := Array("X","Y","Z","R","U","V")
 
 ; Init stick vars for vJoy
 axis_list_vjoy := Array("X","Y","Z","RX","RY","RZ","SL0","SL1")
-manual_control := 0
+quick_bind_mode := 0
 virtual_axes := 8
 virtual_buttons := VJoy_GetVJDButtonNumber(vjoy_id)
 ;virtual_hats := VJoy_GetContPovNumber(vjoy_id)
@@ -121,7 +122,7 @@ Gui, Add, Text, x380 y%th2% w50 R2 Center, % "Deadzone %"
 Gui, Add, Text, x435 y%th2% w50 R2 Center, % "Sensitivity %"
 Gui, Add, Text, x485 y%th2% w50 h20 Center, Physical
 Gui, Add, Text, x530 y%th2% w40 h20 Center, Virtual
-Gui, Add, Text, x568 y%th2% w20 h20 Center, MC
+Gui, Add, Text, x568 y%th2% w20 h20 Center, QB
 
 tmp := 0
 
@@ -185,7 +186,7 @@ Loop, %virtual_buttons% {
 		xpos := xbase + 205
 		Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, State
 		xpos := xbase + 268
-		Gui, Add, Text, x%xpos% y%th2% w20 h20 Center, MC
+		Gui, Add, Text, x%xpos% y%th2% w20 h20 Center, QB
 
 		button_row = 1
 	}
@@ -224,7 +225,7 @@ Loop, % virtual_hats {
 	Gui, Add, Text, x30 y%ypos% w40 h20 , Hat %A_Index%
 	ADHD.gui_add("DropDownList", "hat_physical_stick_id_" A_Index, "x80 y" ypos " w50 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
 
-	Gui, Add, Text, x248 y60, MC
+	Gui, Add, Text, x248 y60, QB
 	
 	Gui, Add, Text, x200 y100, Up
 
@@ -237,7 +238,7 @@ Loop, % virtual_hats {
 	button_row++
 }
 
-; MANUAL CONTROL RADIOS
+; QUICKBIND RADIOS
 ; ---------------------
 ; AHK cannot group radios if they are interspersed with other controls, so add them all in one go here.
 
@@ -247,9 +248,9 @@ xpos := 560
 Loop, %virtual_axes% {
 	ypos := 70 + A_Index * 30
 	ypos2 := ypos + 5
-	tmp := "x" xpos " y" ypos " w25 Right gManualControlOptionChanged"
+	tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged"
 	if (A_Index == 1){
-		tmp := tmp " vManualControlAxes Checked"
+		tmp := tmp " vQuickBindAxes Checked"
 	}
 	Gui, Add, Radio, %tmp%
 }
@@ -273,9 +274,9 @@ Loop, %virtual_buttons% {
 	ypos2 := ypos + 5
 	xpos := xbase + 260
 	
-	tmp := "x" xpos " y" ypos " w25 Right gManualControlOptionChanged"
+	tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged"
 	if (A_Index == 1 || A_Index == 17){
-		tmp := tmp " vManualControlButtons" button_tab-1 " Checked"
+		tmp := tmp " vQuickBindButtons" button_tab-1 " Checked"
 	}
 	Gui, Add, Radio, %tmp%
 	button_row++
@@ -284,8 +285,8 @@ Loop, %virtual_buttons% {
 Gui, Tab, 4
 
 Loop, %virtual_hats% {
-	; Create Manual Control menu for U/D/L/R
-	grp := " vManualControlHats gManualControlOptionChanged"
+	; Create QuickBind menu for U/D/L/R
+	grp := " vQuickBindHats gQuickBindOptionChanged"
 	
 	Gui, Add, Radio, x250 y100%grp%
 	Gui, Add, Radio, x250 y120
@@ -293,26 +294,34 @@ Loop, %virtual_hats% {
 	Gui, Add, Radio, x250 y160
 }
 
-; MANUAL CONTROL FOOTER
+; QUICKBIND FOOTER
 ; ---------------------
 
 Gui, Tab
 
-Gui, Add, GroupBox, x5 y355 w585 h105 vManualControlLabelGroup, Manual Control
+Gui, Add, GroupBox, x5 y355 w585 h105 vQuickBindLabelGroup, QuickBind
 		
-Gui, Add, Text, x10 y375 vManualControlLabelDelay, Delay (seconds)
-Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDelay  gManualControlOptionChanged, 1
-ManualControlDelay_TT := "The amount of time between you hitting the Test Axis binding,`nand Manual Control starting to manipulate the axis or button"
+Gui, Add, Text, x10 y375 vQuickBindLabelDelay, Delay (seconds)
+Gui, Add, Edit, xp+100 yp-2 w70 vQuickBindDelay  gQuickBindOptionChanged, 1
+QuickBindDelay_TT := "The amount of time between you hitting the QuickBind binding,`nand QuickBind starting to manipulate the axis or button"
 
-Gui, Add, Text, x10 y400 vManualControlLabelDuration, Duration (seconds)
-Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDuration  gManualControlOptionChanged, 1
-ManualControlDuration_TT := "The amount of time that Manual Control moves the axis or holds the button"
+Gui, Add, Text, x10 y400 vQuickBindLabelDuration, Duration (seconds)
+Gui, Add, Edit, xp+100 yp-2 w70 vQuickBindDuration  gQuickBindOptionChanged, 1
+QuickBindDuration_TT := "The amount of time that QuickBind moves the axis or holds the button"
 
-Gui, Add, Text, x10 y425 vManualControlLabelAxisType, Axis movement type
-Gui, Add, DropDownList, xp+100 yp-2 w70 vManualControlAxisType gManualControlOptionChanged, High-Low||Mid-High|Mid-Low
-ManualControlAxisType_TT := "How Manual Control moves the axis.`n`nMid-High just moves up.`nMid-Low just moves down.`nHigh-Low moves to both ends"
+Gui, Add, Text, x10 y425 vQuickBindLabelAxisType, Axis movement type
+Gui, Add, DropDownList, xp+100 yp-2 w70 vQuickBindAxisType gQuickBindOptionChanged, High-Low||Mid-High|Mid-Low
+QuickBindAxisType_TT := "How QuickBind moves the axis.`n`nMid-High just moves up.`nMid-Low just moves down.`nHigh-Low moves to both ends"
 
-Gui, Add, Text, x200 y365 vManualControlLabelInstructions, MANUAL CONTROL INSTRUCTIONS:`nIf you find that a game always detects your physical stick instead of the virtual one,`nyou need Manual Control mode.`n1) Select a button or an axis from the "MC" column above.`n2) Choose options on the left (Hover over them to see what they do).`n3) Bind something to "Test Axis" on the Bindings tab.`n4) Go into game, hit the "Test Axis" button, then initiate the game's bind function.
+tmp := "QuickBind Instructions:`n"
+tmp .= "Lets you bind the virtual stick in a game without having to move the physical stick.`n"
+tmp .= "Before using, make sure you have defined a QuickBind key in the Bindings tab.`n"
+tmp .= "1) Select the button or axis from the 'QB' column above that you wish to bind in-game`n"
+tmp .= "2) Choose options on the left (Hover over them to see what they do).`n"
+tmp .= "3) In-game, hit the the QuickBind key, then activate the game's bind function.`n"
+tmp .= "    UJR will operate the axis or button, and the game should bind to the virtual stick."
+Gui, Add, Text, x190 y365 vQuickBindLabelInstructions, %tmp%
+;If you find that a game always detects your physical stick instead of the virtual one,`nyou need QuickBind mode.`n1) Select a button or an axis from the "QB" column above.`n2) Choose options on the left (Hover over them to see what they do).`n3) Bind something to "QuickBind" on the Bindings tab.`n4) In game, hit the "QuickBind" button, then initiate the game's bind function.
 
 ; End GUI creation section
 ; ============================================================================================
@@ -330,7 +339,7 @@ Loop{
 		merged_axes[%A_Index%] := -1
 	}
 	
-	if (!manual_control){
+	if (!quick_bind_mode){
 		; Cycle through rows. MAY NOT BE IN ORDER OF VIRTUAL AXES!
 		For index, value in axis_mapping {
 			;if (virtual_axis_id_%index% != "None" && axis_mapping[index].id != "None" && axis_mapping[index].axis != "None"){
@@ -376,7 +385,7 @@ Loop{
 		
 		For index, value in button_mapping {
 			if (button_mapping[index].id != "None" && button_mapping[index].button != "None"){
-				if (manual_control == 0){
+				if (quick_bind_mode == 0){
 					if (value.pov){
 						; get current state of pov in val
 						val := PovToAngle(GetKeyState(value.id . "Joy" . "POV"))
@@ -401,7 +410,7 @@ Loop{
 		
 		For index, value in hat_mapping {
 			if (hat_mapping[index].id != "None"){
-				if (manual_control == 0){
+				if (quick_bind_mode == 0){
 					VJoy_SetContPov(GetKeyState(value.id . "Joy" . "POV"), vjoy_id, A_Index)
 				}
 			}
@@ -503,7 +512,7 @@ SetButtonState(but,state){
 ; ============================================================================================
 ; LABELS
 
-ManualControlOptionChanged:
+QuickBindOptionChanged:
 	Gui, Submit, Nohide
 	return
 
@@ -513,26 +522,26 @@ ManualControlOptionChanged:
 tab_changed_hook(){
 	Global adhd_current_tab
 	
-	GuiControl, +Hidden, ManualControlLabelGroup
-	GuiControl, +Hidden, ManualControlLabelDelay
-	GuiControl, +Hidden, ManualControlDelay
-	GuiControl, +Hidden, ManualControlDelay
-	GuiControl, +Hidden, ManualControlLabelDuration
-	GuiControl, +Hidden, ManualControlDuration
-	GuiControl, +Hidden, ManualControlLabelAxisType
-	GuiControl, +Hidden, ManualControlAxisType
-	GuiControl, +Hidden, ManualControlLabelInstructions
+	GuiControl, +Hidden, QuickBindLabelGroup
+	GuiControl, +Hidden, QuickBindLabelDelay
+	GuiControl, +Hidden, QuickBindDelay
+	GuiControl, +Hidden, QuickBindDelay
+	GuiControl, +Hidden, QuickBindLabelDuration
+	GuiControl, +Hidden, QuickBindDuration
+	GuiControl, +Hidden, QuickBindLabelAxisType
+	GuiControl, +Hidden, QuickBindAxisType
+	GuiControl, +Hidden, QuickBindLabelInstructions
 
 	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
-		GuiControl, -Hidden, ManualControlLabelGroup
-		GuiControl, -Hidden, ManualControlLabelDelay
-		GuiControl, -Hidden, ManualControlDelay
-		GuiControl, -Hidden, ManualControlLabelDuration
-		GuiControl, -Hidden, ManualControlDuration
-		GuiControl, -Hidden, ManualControlLabelInstructions
+		GuiControl, -Hidden, QuickBindLabelGroup
+		GuiControl, -Hidden, QuickBindLabelDelay
+		GuiControl, -Hidden, QuickBindDelay
+		GuiControl, -Hidden, QuickBindLabelDuration
+		GuiControl, -Hidden, QuickBindDuration
+		GuiControl, -Hidden, QuickBindLabelInstructions
 		if (adhd_current_tab == "Axes"){
-			GuiControl, -Hidden, ManualControlLabelAxisType
-			GuiControl, -Hidden, ManualControlAxisType
+			GuiControl, -Hidden, QuickBindLabelAxisType
+			GuiControl, -Hidden, QuickBindAxisType
 		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
 		
 		} else if (adhd_current_tab == "Hats"){
@@ -616,11 +625,11 @@ on_exit_hook(){
 ; ACTIONS
 
 
-; Manual Control triggered
-TestAxis:
+; QuickBind triggered
+QuickBind:
 	; Work out what control we need to manipulate
 	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
-		manual_control := 1
+		quick_bind_mode := 1
 
 		; set all configured axes to neutral position
 		For index, value in axis_mapping {
@@ -642,12 +651,12 @@ TestAxis:
 		
 		
 		; Wait for user to click bind in game
-		Sleep, % ManualControlDelay * 1000
+		Sleep, % QuickBindDelay * 1000
 
 		if (adhd_current_tab == "Axes"){
 
 			; Check axis is mapped
-			value := axis_mapping[ManualControlAxes]
+			value := axis_mapping[QuickBindAxes]
 			axismap := axis_list_vjoy[value.virt_axis]
 			if (axismap == ""){
 				return
@@ -655,30 +664,30 @@ TestAxis:
 			
 			soundbeep
 			
-			if (ManualControlAxisType == "High-Low"){
-				GuiControl,,axis_state_slider_%ManualControlAxes%,100
+			if (QuickBindAxisType == "High-Low"){
+				GuiControl,,axis_state_slider_%QuickBindAxes%,100
 				VJoy_SetAxis(32767, vjoy_id, HID_USAGE_%axismap%)
-				Sleep, % (ManualControlDuration * 1000 ) / 2
+				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
-				GuiControl,,axis_state_slider_%ManualControlAxes%,0
+				GuiControl,,axis_state_slider_%QuickBindAxes%,0
 				VJoy_SetAxis(0, vjoy_id, HID_USAGE_%axismap%)
-				;Sleep, % (ManualControlDuration * 1000 ) / 2
-			} else if (ManualControlAxisType == "Mid-High"){
-				GuiControl,,axis_state_slider_%ManualControlAxes%,50
+				;Sleep, % (QuickBindDuration * 1000 ) / 2
+			} else if (QuickBindAxisType == "Mid-High"){
+				GuiControl,,axis_state_slider_%QuickBindAxes%,50
 				VJoy_SetAxis(16384, vjoy_id, HID_USAGE_%axismap%)
-				Sleep, % (ManualControlDuration * 1000 ) / 2
+				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
-				GuiControl,,axis_state_slider_%ManualControlAxes%,100
+				GuiControl,,axis_state_slider_%QuickBindAxes%,100
 				VJoy_SetAxis(32767, vjoy_id, HID_USAGE_%axismap%)
-				Sleep, % (ManualControlDuration * 1000 ) / 2
+				Sleep, % (QuickBindDuration * 1000 ) / 2
 			} else {
-				GuiControl,,axis_state_slider_%ManualControlAxes%,50
+				GuiControl,,axis_state_slider_%QuickBindAxes%,50
 				VJoy_SetAxis(16384, vjoy_id, HID_USAGE_%axismap%)
-				Sleep, % (ManualControlDuration * 1000 ) / 2
+				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
-				GuiControl,,axis_state_slider_%ManualControlAxes%,0
+				GuiControl,,axis_state_slider_%QuickBindAxes%,0
 				VJoy_SetAxis(0, vjoy_id, HID_USAGE_%axismap%)
-				Sleep, % (ManualControlDuration * 1000 ) / 2
+				Sleep, % (QuickBindDuration * 1000 ) / 2
 			}
 		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
 			; Check button is mapped
@@ -689,13 +698,13 @@ TestAxis:
 				btn_id := 16
 				btn_group := 2
 			}
-			btn_id += ManualControlButtons%btn_group%
+			btn_id += QuickBindButtons%btn_group%
 			soundbeep
 
 			SetButtonState(btn_id,1)
 			VJoy_SetBtn(1, vjoy_id, btn_id)
 			
-			Sleep, % ManualControlDuration * 1000
+			Sleep, % QuickBindDuration * 1000
 			
 			SetButtonState(btn_id,0)
 			VJoy_SetBtn(0, vjoy_id, btn_id)
@@ -705,7 +714,7 @@ TestAxis:
 			
 		}
 		
-		manual_control := 0
+		quick_bind_mode := 0
 		soundbeep, 750
 	}
 
