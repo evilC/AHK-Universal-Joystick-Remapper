@@ -247,7 +247,7 @@ xpos := 560
 Loop, %virtual_axes% {
 	ypos := 70 + A_Index * 30
 	ypos2 := ypos + 5
-	tmp := "x" xpos " y" ypos " w25 Right"
+	tmp := "x" xpos " y" ypos " w25 Right gManualControlOptionChanged"
 	if (A_Index == 1){
 		tmp := tmp " vManualControlAxes Checked"
 	}
@@ -273,7 +273,7 @@ Loop, %virtual_buttons% {
 	ypos2 := ypos + 5
 	xpos := xbase + 260
 	
-	tmp := "x" xpos " y" ypos " w25 Right"
+	tmp := "x" xpos " y" ypos " w25 Right gManualControlOptionChanged"
 	if (A_Index == 1 || A_Index == 17){
 		tmp := tmp " vManualControlButtons" button_tab-1 " Checked"
 	}
@@ -285,7 +285,7 @@ Gui, Tab, 4
 
 Loop, %virtual_hats% {
 	; Create Manual Control menu for U/D/L/R
-	grp := " vManualControlHats"
+	grp := " vManualControlHats gManualControlOptionChanged"
 	
 	Gui, Add, Radio, x250 y100%grp%
 	Gui, Add, Radio, x250 y120
@@ -301,15 +301,15 @@ Gui, Tab
 Gui, Add, GroupBox, x5 y355 w585 h105 vManualControlLabelGroup, Manual Control
 		
 Gui, Add, Text, x10 y375 vManualControlLabelDelay, Delay (seconds)
-Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDelay, 1
+Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDelay  gManualControlOptionChanged, 1
 ManualControlDelay_TT := "The amount of time between you hitting the Test Axis binding,`nand Manual Control starting to manipulate the axis or button"
 
 Gui, Add, Text, x10 y400 vManualControlLabelDuration, Duration (seconds)
-Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDuration, 1
+Gui, Add, Edit, xp+100 yp-2 w70 vManualControlDuration  gManualControlOptionChanged, 1
 ManualControlDuration_TT := "The amount of time that Manual Control moves the axis or holds the button"
 
 Gui, Add, Text, x10 y425 vManualControlLabelAxisType, Axis movement type
-Gui, Add, DropDownList, xp+100 yp-2 w70 vManualControlAxisType, High-Low||Mid-High|Mid-Low
+Gui, Add, DropDownList, xp+100 yp-2 w70 vManualControlAxisType gManualControlOptionChanged, High-Low||Mid-High|Mid-Low
 ManualControlAxisType_TT := "How Manual Control moves the axis.`n`nMid-High just moves up.`nMid-Low just moves down.`nHigh-Low moves to both ends"
 
 Gui, Add, Text, x200 y365 vManualControlLabelInstructions, MANUAL CONTROL INSTRUCTIONS:`nIf you find that a game always detects your physical stick instead of the virtual one,`nyou need Manual Control mode.`n1) Select a button or an axis from the "MC" column above.`n2) Choose options on the left (Hover over them to see what they do).`n3) Bind something to "Test Axis" on the Bindings tab.`n4) Go into game, hit the "Test Axis" button, then initiate the game's bind function.
@@ -330,12 +330,12 @@ Loop{
 		merged_axes[%A_Index%] := -1
 	}
 	
-	; Cycle through rows. MAY NOT BE IN ORDER OF VIRTUAL AXES!
-	For index, value in axis_mapping {
-		;if (virtual_axis_id_%index% != "None" && axis_mapping[index].id != "None" && axis_mapping[index].axis != "None"){
-		if (virtual_axis_id_%index% != "None"){
-			; Main section for active axes
-			if (!manual_control){	; Normal mode
+	if (!manual_control){
+		; Cycle through rows. MAY NOT BE IN ORDER OF VIRTUAL AXES!
+		For index, value in axis_mapping {
+			;if (virtual_axis_id_%index% != "None" && axis_mapping[index].id != "None" && axis_mapping[index].axis != "None"){
+			if (virtual_axis_id_%index% != "None"){
+				; Main section for active axes
 				; Get input value
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
 
@@ -349,64 +349,61 @@ Loop{
 				GuiControl,, virtual_value_%index%, % round((val-50)*2,2)
 				; Move slider to show input value
 				GuiControl,, axis_state_slider_%index%, % val
-			} else {	; manual control mode
-				GuiControlGet, val,, axis_state_slider_%index%
-				val := AdjustAxis(val,value)
+				
+				; Set the value for this axis on the virtual stick
+				axismap := axis_list_vjoy[value.virt_axis]
+
+				ax := value.axis
+				if (value.merge != "None"){
+					if (merged_axes[%ax%] == -1){
+						merged_axes[%ax%] := val
+					} else {
+						val := ((val/2)+50) + ((merged_axes[%ax%]/2) * -1)
+					}
+				}
+				; rescale to vJoy style 0->32767
+				val := val * 327.67
+				VJoy_SetAxis(val, vjoy_id, HID_USAGE_%axismap%)
+
+			} else {
+				; Blank out unused axes
+				GuiControl,, physical_value_%index%, 
+				GuiControl,, virtual_value_%index%, 
+				GuiControl,, axis_state_slider_%index%, 50
 			}
 			
-			; Set the value for this axis on the virtual stick
-			axismap := axis_list_vjoy[value.virt_axis]
-
-			ax := value.axis
-			if (value.merge != "None"){
-				if (merged_axes[%ax%] == -1){
-					merged_axes[%ax%] := val
-				} else {
-					val := ((val/2)+50) + ((merged_axes[%ax%]/2) * -1)
-				}
-			}
-			; rescale to vJoy style 0->32767
-			val := val * 327.67
-			VJoy_SetAxis(val, vjoy_id, HID_USAGE_%axismap%)
-
-		} else {
-			; Blank out unused axes
-			GuiControl,, physical_value_%index%, 
-			GuiControl,, virtual_value_%index%, 
-			GuiControl,, axis_state_slider_%index%, 50
 		}
 		
-	}
-	
-	For index, value in button_mapping {
-		if (button_mapping[index].id != "None" && button_mapping[index].button != "None"){
-			if (manual_control == 0){
-				if (value.pov){
-					; get current state of pov in val
-					val := PovToAngle(GetKeyState(value.id . "Joy" . "POV"))
-					; Does it match the current mapping?
-					val := PovMatchesAngle(val,value.pov)
-					SetButtonState(index,val)
+		For index, value in button_mapping {
+			if (button_mapping[index].id != "None" && button_mapping[index].button != "None"){
+				if (manual_control == 0){
+					if (value.pov){
+						; get current state of pov in val
+						val := PovToAngle(GetKeyState(value.id . "Joy" . "POV"))
+						; Does it match the current mapping?
+						val := PovMatchesAngle(val,value.pov)
+						SetButtonState(index,val)
+					} else {
+						val := GetKeyState(value.id . "Joy" . value.button)
+						SetButtonState(index,val)
+					}
 				} else {
-					val := GetKeyState(value.id . "Joy" . value.button)
-					SetButtonState(index,val)
+					GuiControlGet, val,, button_state_%index%
+					if (val == "On"){
+						val := 1
+					} else {
+						val := 0
+					}
 				}
-			} else {
-				GuiControlGet, val,, button_state_%index%
-				if (val == "On"){
-					val := 1
-				} else {
-					val := 0
+				VJoy_SetBtn(val, vjoy_id, index)
+			}		
+		}
+		
+		For index, value in hat_mapping {
+			if (hat_mapping[index].id != "None"){
+				if (manual_control == 0){
+					VJoy_SetContPov(GetKeyState(value.id . "Joy" . "POV"), vjoy_id, A_Index)
 				}
-			}
-			VJoy_SetBtn(val, vjoy_id, index)
-		}		
-	}
-	
-	For index, value in hat_mapping {
-		if (hat_mapping[index].id != "None"){
-			if (manual_control == 0){
-				VJoy_SetContPov(GetKeyState(value.id . "Joy" . "POV"), vjoy_id, A_Index)
 			}
 		}
 	}
@@ -502,6 +499,13 @@ SetButtonState(but,state){
 		GuiControl,,button_state_%but%, Off
 	}
 }
+
+; ============================================================================================
+; LABELS
+
+ManualControlOptionChanged:
+	Gui, Submit, Nohide
+	return
 
 ; ============================================================================================
 ; EVENT HOOKS
@@ -614,29 +618,57 @@ on_exit_hook(){
 
 ; Manual Control triggered
 TestAxis:
-
 	; Work out what control we need to manipulate
 	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
 		manual_control := 1
-		
+
 		del := ManualControlDelay * 1000
 		Sleep, %del%
 
-		soundbeep
-
 		if (adhd_current_tab == "Axes"){
 			
+			value := axis_mapping[ManualControlAxes]
+			axismap := axis_list_vjoy[value.virt_axis]
+			
+			if (axismap == ""){
+				return
+			}
+			
+			soundbeep
+			
+			if (ManualControlAxisType == "High-Low"){
+				GuiControl,,axis_state_slider_%ManualControlAxes%,100
+				VJoy_SetAxis(32767, vjoy_id, HID_USAGE_%axismap%)
+				Sleep, % (ManualControlDuration * 1000 ) / 2
+				
+				GuiControl,,axis_state_slider_%ManualControlAxes%,0
+				VJoy_SetAxis(0, vjoy_id, HID_USAGE_%axismap%)
+				;Sleep, % (ManualControlDuration * 1000 ) / 2
+			} else if (ManualControlAxisType == "Mid-High"){
+				GuiControl,,axis_state_slider_%ManualControlAxes%,50
+				VJoy_SetAxis(16384, vjoy_id, HID_USAGE_%axismap%)
+				Sleep, % (ManualControlDuration * 1000 ) / 2
+				
+				GuiControl,,axis_state_slider_%ManualControlAxes%,100
+				VJoy_SetAxis(32767, vjoy_id, HID_USAGE_%axismap%)
+				Sleep, % (ManualControlDuration * 1000 ) / 2
+			} else {
+				GuiControl,,axis_state_slider_%ManualControlAxes%,50
+				VJoy_SetAxis(16384, vjoy_id, HID_USAGE_%axismap%)
+				Sleep, % (ManualControlDuration * 1000 ) / 2
+				
+				GuiControl,,axis_state_slider_%ManualControlAxes%,0
+				VJoy_SetAxis(0, vjoy_id, HID_USAGE_%axismap%)
+				Sleep, % (ManualControlDuration * 1000 ) / 2
+			}
 		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
 			
 		} else if (adhd_current_tab == "Hats"){
 			
 		}
 		
-		dur := ManualControlDuration * 1000
-		Sleep, %dur%
-		
 		manual_control := 0
-		
+		soundbeep, 750
 	}
 
 	return
