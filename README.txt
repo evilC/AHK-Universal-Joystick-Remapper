@@ -20,12 +20,12 @@ http://sourceforge.net/projects/vjoystick/files/Beta%202.x/
 Note, if you had UJR 1.x installed, you will need to remove vJoy 1.x and install vJoy 2.x
 You will need to reboot to enter Test Mode, then vJoy will install before windows comes back up fully.
 
-3) Extract the contents of the UJR ZIP and double-click ujr.ahk
-Note: ujr.ahk needs the contents of the "vJoyLib" folder, so do not separate ujr.ahk and the vJoyLib folder!
-You can always drag a shortcut to ujr.ahk anywhere you like though.
-
-4) Configure the vJoy stick through the "Configure vJoy" program in your start menu. Enable all the axes and as many buttons as you require.
+3) Configure the vJoy stick through the "Configure vJoy" program in your start menu. Enable all the axes and as many buttons as you require.
 UJR cannot add axes / buttons to the vjoy stick - you must do this using the vjoy app, then use UJR to assign functions to those axes / buttons.
+
+4) Extract the contents of the UJR ZIP and double-click ujr.exe
+Note: ujr.ahk needs the contents of the "vJoyLib" folder, so do not separate ujr.ahk and the vJoyLib folder!
+You can always drag a shortcut to ujr.exe anywhere you like though.
 
 ===================================== 8< =====================================
 

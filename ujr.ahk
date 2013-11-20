@@ -1,6 +1,24 @@
 ; UJR - Universal Joystick Remapper
 
-#SingleInstance Off
+; ToDo:
+; =====
+; Remove Axis Merging? Limited use, waste of space.
+; Also remove virtual axis dropdown? Some change of code to check if stick id + axis set. More robust?
+
+; Make QuickBind settings persistent? Per-Profile?
+
+; Code ADHD Update Notification system before release
+
+; Previous / Next QuickBind bindings
+
+; Previous / Next Tab bindings
+
+; Text-to-speech for tab / binding ?
+
+; Auto-map function - specify a stick ID and it configures the profile straight through
+; No undo in ADHD - warn this is destructive!
+
+#SingleInstance On
 
 ; Create an instance of the library
 ADHD := New ADHDLib
@@ -21,7 +39,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: 5.0, author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "5.0 BETA 1", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ;ADHD.config_default_app("CryENGINE")
