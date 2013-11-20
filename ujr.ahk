@@ -303,7 +303,7 @@ Gui, Add, GroupBox, x5 y355 w585 h105 vQuickBindLabelGroup, QuickBind
 		
 Gui, Add, Text, x10 y375 vQuickBindLabelDelay, Delay (seconds)
 Gui, Add, Edit, xp+100 yp-2 w70 vQuickBindDelay  gQuickBindOptionChanged, 1
-QuickBindDelay_TT := "The amount of time between you hitting the QuickBind binding,`nand QuickBind starting to manipulate the axis or button"
+QuickBindDelay_TT := "The amount of time between you hitting the QuickBind key,`nand QuickBind starting to manipulate the axis or button"
 
 Gui, Add, Text, x10 y400 vQuickBindLabelDuration, Duration (seconds)
 Gui, Add, Edit, xp+100 yp-2 w70 vQuickBindDuration  gQuickBindOptionChanged, 1
@@ -321,7 +321,6 @@ tmp .= "2) Choose options on the left (Hover over them to see what they do).`n"
 tmp .= "3) In-game, hit the the QuickBind key, then activate the game's bind function.`n"
 tmp .= "    UJR will operate the axis or button, and the game should bind to the virtual stick."
 Gui, Add, Text, x190 y365 vQuickBindLabelInstructions, %tmp%
-;If you find that a game always detects your physical stick instead of the virtual one,`nyou need QuickBind mode.`n1) Select a button or an axis from the "QB" column above.`n2) Choose options on the left (Hover over them to see what they do).`n3) Bind something to "QuickBind" on the Bindings tab.`n4) In game, hit the "QuickBind" button, then initiate the game's bind function.
 
 ; End GUI creation section
 ; ============================================================================================
