@@ -58,6 +58,8 @@ ADHD.config_updates("http://evilc.com/files/ahk/vjoy/ujr.au.txt")
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
 ADHD.config_hotkey_add({uiname: "QuickBind", subroutine: "QuickBind"})
 adhd_hk_k_1_TT := "Trigger QuickBind"
+ADHD.config_hotkey_add({uiname: "QuickBind Select", subroutine: "QuickBindSelect"})
+adhd_hk_k_2_TT := "Select Button / Axis for QuickBind"
 
 ; Hook into ADHD events
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
@@ -282,7 +284,7 @@ xpos := 560
 Loop, %virtual_axes% {
 	ypos := 70 + A_Index * 30
 	ypos2 := ypos + 5
-	tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged"
+	tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged hwndQB_A_" A_Index
 	if (A_Index == 1){
 		tmp := tmp " vQuickBindAxes Checked"
 	}
@@ -308,7 +310,8 @@ Loop, %virtual_buttons% {
 	ypos2 := ypos + 5
 	xpos := xbase + 260
 	
-	tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged"
+	;tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged"
+	tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged hwndQB_B_" A_Index
 	if (A_Index == 1 || A_Index == 17){
 		tmp := tmp " vQuickBindButtons" button_tab-1 " Checked"
 	}
@@ -322,10 +325,10 @@ Loop, %virtual_hats% {
 	; Create QuickBind menu for U/D/L/R
 	grp := " vQuickBindHats Checked"
 	
-	Gui, Add, Radio, x250 y100 gQuickBindOptionChanged%grp%
-	Gui, Add, Radio, x250 y120 gQuickBindOptionChanged
-	Gui, Add, Radio, x250 y140 gQuickBindOptionChanged
-	Gui, Add, Radio, x250 y160 gQuickBindOptionChanged
+	Gui, Add, Radio, x250 y100 gQuickBindOptionChanged hwndQB_H_1 %grp%
+	Gui, Add, Radio, x250 y120 gQuickBindOptionChanged hwndQB_H_2
+	Gui, Add, Radio, x250 y140 gQuickBindOptionChanged hwndQB_H_3
+	Gui, Add, Radio, x250 y160 gQuickBindOptionChanged hwndQB_H_4
 }
 
 ; QUICKBIND FOOTER
@@ -418,24 +421,15 @@ Loop{
 		
 		For index, value in button_mapping {
 			if (button_mapping[index].id != "None" && button_mapping[index].button != "None"){
-				if (quick_bind_mode == 0){
-					if (value.pov){
-						; get current state of pov in val
-						val := PovToAngle(GetKeyState(value.id . "Joy" . "POV"))
-						; Does it match the current mapping?
-						val := PovMatchesAngle(val,value.pov)
-						SetButtonState(index,val)
-					} else {
-						val := GetKeyState(value.id . "Joy" . value.button)
-						SetButtonState(index,val)
-					}
+				if (value.pov){
+					; get current state of pov in val
+					val := PovToAngle(GetKeyState(value.id . "Joy" . "POV"))
+					; Does it match the current mapping?
+					val := PovMatchesAngle(val,value.pov)
+					SetButtonState(index,val)
 				} else {
-					GuiControlGet, val,, button_state_%index%
-					if (val == "On"){
-						val := 1
-					} else {
-						val := 0
-					}
+					val := GetKeyState(value.id . "Joy" . value.button)
+					SetButtonState(index,val)
 				}
 				VJoy_SetBtn(val, vjoy_id, index)
 			}		
@@ -443,17 +437,15 @@ Loop{
 		
 		For index, value in hat_mapping {
 			if (hat_mapping[index].id != "None"){
-				if (quick_bind_mode == 0){
-					val := GetKeyState(value.id . "Joy" . "POV")
-					Loop, 4 {
-						if (PovMatchesAngle(PovToAngle(val), hat_axes[A_Index])){
-							SetHatState(A_Index,1)
-						} else {
-							SetHatState(A_Index,0)
-						}
+				val := GetKeyState(value.id . "Joy" . "POV")
+				Loop, 4 {
+					if (PovMatchesAngle(PovToAngle(val), hat_axes[A_Index])){
+						SetHatState(A_Index,1)
+					} else {
+						SetHatState(A_Index,0)
 					}
-					VJoy_SetContPov(val, vjoy_id, A_Index)
 				}
+				VJoy_SetContPov(val, vjoy_id, A_Index)
 			}
 		}
 	}
@@ -553,8 +545,6 @@ HatIndexToPov(angle){
 		return -1
 	}
 }
-
-
 
 ; Changes display to reflect the state of a button
 SetButtonState(but,state){
@@ -710,7 +700,6 @@ QuickBind:
 		}
 		
 		; Set all configured buttons to off
-		
 		Loop, % virtual_buttons {
 			SetButtonState(A_Index,0)
 			VJoy_SetBtn(0, vjoy_id, A_Index)
@@ -721,13 +710,9 @@ QuickBind:
 			SetHatState(A_Index,0)
 		}
 		VJoy_SetContPov(-1, vjoy_id, 1)
-		
-		
-		; Wait for user to click bind in game
-		Sleep, % QuickBindDelay * 1000
 
+		; Find which tab we are on and which control is selected, then move it after a delay
 		if (adhd_current_tab == "Axes"){
-
 			; Check axis is mapped
 			value := axis_mapping[QuickBindAxes]
 			axismap := axis_list_vjoy[value.virt_axis]
@@ -735,7 +720,7 @@ QuickBind:
 				return
 			}
 			
-			soundbeep
+			play_quickbind_delay()
 			
 			if (QuickBindAxisType == "High-Low"){
 				GuiControl,,axis_state_slider_%QuickBindAxes%,100
@@ -763,7 +748,6 @@ QuickBind:
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 			}
 		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
-			; Check button is mapped
 			if (adhd_current_tab == "Buttons 1"){
 				btn_id := 0
 				btn_group := 1
@@ -772,7 +756,8 @@ QuickBind:
 				btn_group := 2
 			}
 			btn_id += QuickBindButtons%btn_group%
-			soundbeep
+			
+			play_quickbind_delay()
 
 			SetButtonState(btn_id,1)
 			VJoy_SetBtn(1, vjoy_id, btn_id)
@@ -781,10 +766,9 @@ QuickBind:
 			
 			SetButtonState(btn_id,0)
 			VJoy_SetBtn(0, vjoy_id, btn_id)
-			
-			
 		} else if (adhd_current_tab == "Hats"){
-			soundbeep
+			play_quickbind_delay()
+
 			SetHatState(QuickBindHats,1)
 			VJoy_SetContPov(HatIndexToPov(QuickBindHats), vjoy_id, 1)
 			Sleep, % QuickBindDuration * 1000
@@ -793,8 +777,121 @@ QuickBind:
 		quick_bind_mode := 0
 		soundbeep, 750
 	}
-
 	return
+
+QuickBindSelect:
+	quickbind_select()
+	return
+
+; Selects a button / axis for quickbind by detecting what the user presses / moves	
+quickbind_select(){
+	Global axis_mapping
+	Global button_mapping
+	Global hat_mapping
+	Global hat_axes
+	Global vjoy_id
+	Global axis_list_ahk
+	
+	quickbind_start := A_TickCount
+	last_beep := 0
+	
+	Loop, {
+		if (A_TickCount >= (quickbind_start + 5000)){
+			return
+		}
+		if (A_TickCount >= (last_beep + 750)){
+			soundbeep, 500, 100
+			last_beep := A_TickCount
+		}
+		
+		For index, value in button_mapping {
+			if (button_mapping[index].id != "None" && button_mapping[index].button != "None"){
+				val := GetKeyState(value.id . "Joy" . value.button)
+				if (val){
+					; Switch to tab and select QB radio for this button
+					if (A_Index > 16){
+						arr := 2
+						tmp := QuickBindButtons2
+					} else {
+						arr := 1
+						tmp := QuickBindButtons1
+					}
+					tab := 1 + arr
+					GuiControl, Choose,adhd_current_tab, %tab%
+					
+					control, check,,,% "ahk_id " QB_B_%A_Index%%tmp%
+					Gui, Submit, NoHide
+					
+					quickbind_selected()
+					return
+				}
+			}
+		}
+		
+		For index, value in hat_mapping {
+			if (hat_mapping[index].id != "None"){
+				val := GetKeyState(value.id . "Joy" . "POV")
+				Loop, 4 {
+					if (PovMatchesAngle(PovToAngle(val), hat_axes[A_Index])){
+						; Reject diagonal - ambiguous mapping
+						if (HatIndexToPov(A_Index) != val){
+							continue
+						}
+						; Switch to tab and select QB radio for this button
+						GuiControl, Choose,adhd_current_tab, 4
+						
+						control, check,,,% "ahk_id " QB_H_%A_Index%
+						Gui, Submit, NoHide
+						
+						quickbind_selected()
+						return
+					}
+				}
+			}
+		}
+
+		For index, value in axis_mapping {
+			; ToDo: Store initial value and compare to that? ie if throttle is at max, will trigger this code.
+			if (virtual_axis_id_%index% != "None"){
+				; Main section for active axes
+				; Get input value
+				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
+				
+				tmp := round((val-50)*2,2)
+				if (abs(tmp) > 75){
+					; Switch to tab and select QB radio for this button
+					GuiControl, Choose,adhd_current_tab, 1
+					
+					ax := value.axis
+					control, check,,,% "ahk_id " QB_A_%ax%
+					Gui, Submit, NoHide
+					
+					quickbind_selected()
+					return
+				}
+			}
+		}
+		Sleep, 10
+	}
+}
+
+quickbind_selected()(){
+	soundbeep, 750
+	return
+}
+
+play_quickbind_delay(){
+	Global QuickBindDelay
+	
+	tick := ((QuickBindDelay * 1000) / 3) - 150
+	soundbeep, 400, 75
+	Sleep, % tick
+	soundbeep, 500, 75
+	Sleep, % tick
+	soundbeep, 750, 75
+	Sleep, % tick
+	return
+}
 
 ; ===================================================================================================
 ; FOOTER SECTION
