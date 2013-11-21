@@ -637,16 +637,17 @@ option_changed_hook(){
 			axis_mapping[A_Index].invert := -1
 		}
 		
-		if virtual_axis_deadzone_%A_Index% is not number
+		if (virtual_axis_deadzone_%A_Index% is not number){
 			GuiControl,,virtual_axis_deadzone_%A_Index%,0
-		else
+		} else {
 			axis_mapping[A_Index].deadzone := virtual_axis_deadzone_%A_Index%
+		}
 		
-		
-		if virtual_axis_sensitivity_%A_Index% is not number
+		if (virtual_axis_sensitivity_%A_Index% is not number){
 			GuiControl,,virtual_axis_sensitivity_%A_Index%,100
-		else
+		} else {
 			axis_mapping[A_Index].sensitivity := virtual_axis_sensitivity_%A_Index%
+		}
 	}
 
 	Loop, %virtual_buttons% {
