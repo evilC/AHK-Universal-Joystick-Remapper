@@ -2,6 +2,8 @@
 
 ; ToDo:
 ; =====
+; Does QuickBind work with hats mapped to buttons?
+
 ; Remove Axis Merging? Limited use, waste of space.
 ; Replace / Add axis splitting? Move to right of Physical Axis?
 
@@ -42,7 +44,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "5.0", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "5.1", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ;ADHD.config_default_app("CryENGINE")
@@ -331,10 +333,16 @@ Loop, %virtual_hats% {
 	Gui, Add, Radio, x250 y160 gQuickBindOptionChanged hwndQB_H_4
 }
 
+; QUICKSET
+; ---------------------
+Gui, Tab
+
+Gui, Add, Button, x440 y339 vQuickSetButton gQuickSetPressed, Quick Set to Stick ID
+;Gui, Add, Button, x400 y339 vQuickSetButton gQuickSetButtons, Quick Set Buttons to Stick ID
+Gui, Add, DropDownList, x560 yp+1 w30 vQuickSetID, 1||2|3|4|5|6|7|8
+
 ; QUICKBIND FOOTER
 ; ---------------------
-
-Gui, Tab
 
 Gui, Add, GroupBox, x5 y355 w585 h105 vQuickBindLabelGroup, QuickBind
 		
@@ -590,6 +598,8 @@ tab_changed_hook(){
 	GuiControl, +Hidden, QuickBindLabelAxisType
 	GuiControl, +Hidden, QuickBindAxisType
 	GuiControl, +Hidden, QuickBindLabelInstructions
+	GuiControl, +Hidden, QuickSetID
+	GuiControl, +Hidden, QuickSetButton
 
 	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
 		GuiControl, -Hidden, QuickBindLabelGroup
@@ -601,8 +611,11 @@ tab_changed_hook(){
 		if (adhd_current_tab == "Axes"){
 			GuiControl, -Hidden, QuickBindLabelAxisType
 			GuiControl, -Hidden, QuickBindAxisType
+			GuiControl, -Hidden, QuickSetButton
+			GuiControl, -Hidden, QuickSetID
 		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
-		
+			GuiControl, -Hidden, QuickSetButton
+			GuiControl, -Hidden, QuickSetID
 		} else if (adhd_current_tab == "Hats"){
 		
 		}
@@ -901,6 +914,48 @@ play_quickbind_delay(){
 	return
 }
 
+QuickSetPressed:
+	if (adhd_current_tab == "Axes"){
+		quickset_axes()
+		;Gosub, QuickSetAxes
+	} else {
+		;Gosub, QuickSetButtons
+		quickset_buttons()
+	}
+	return
+	
+quickset_axes(){
+	Global ADHD
+	Global QuickSetID
+	Global axis_list_ahk
+	
+	Gui, Submit, NoHide
+	; ToDo: Detect how many axes the physical stick has, and only map those
+	; AHK only supports 6 axes per stick, so just populate lines 1-6
+	Loop, 6 {
+		if (GetKeyState(QuickSetID . "Joy" . axis_list_ahk[A_Index]) != ""){
+			GuiControl, choosestring,virtual_axis_id_%A_Index%, %A_Index%
+			GuiControl, choosestring,axis_physical_stick_id_%A_Index%, %QuickSetID%
+			GuiControl, choosestring,physical_axis_id_%A_Index%, %A_Index%
+		}
+	}
+	ADHD.option_changed()
+	return
+}
+
+quickset_buttons(){
+	Global ADHD
+	Global QuickSetID
+	Global virtual_buttons
+
+	Loop, %virtual_buttons% {
+		Gui, Submit, NoHide
+		GuiControl, choosestring,button_physical_stick_id_%A_Index%, %QuickSetID%
+		GuiControl, choosestring,button_id_%A_Index%, %A_Index%
+	}
+	ADHD.option_changed()
+	return
+}
 ; ===================================================================================================
 ; FOOTER SECTION
 
