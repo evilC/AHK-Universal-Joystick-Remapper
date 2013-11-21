@@ -2,8 +2,6 @@
 
 ; ToDo:
 ; =====
-; Does QuickBind work with hats mapped to buttons?
-
 ; Remove Axis Merging? Limited use, waste of space.
 ; Replace / Add axis splitting? Move to right of Physical Axis?
 
@@ -804,6 +802,7 @@ quickbind_select(){
 	Global hat_axes
 	Global vjoy_id
 	Global axis_list_ahk
+	Global adhd_current_tab
 	
 	quickbind_start := A_TickCount
 	last_beep := 0
@@ -828,25 +827,41 @@ quickbind_select(){
 		
 		For index, value in button_mapping {
 			if (button_mapping[index].id != "None" && button_mapping[index].button != "None"){
-				val := GetKeyState(value.id . "Joy" . value.button)
-				if (val){
-					; Switch to tab and select QB radio for this button
-					if (A_Index > 16){
-						arr := 2
-						tmp := QuickBindButtons2
-					} else {
-						arr := 1
-						tmp := QuickBindButtons1
+				if (instr(button_mapping[index].button,"POV ")){
+					; Hat switch mapped to button
+					tmp := SubStr(button_mapping[index].button, 5) 
+					StringLower, tmp, tmp
+					val := GetKeyState(button_mapping[index].id . "Joy" . "POV")
+					val := PovToAngle(val)
+					if (!PovMatchesAngle(val,tmp)){
+						continue
 					}
-					tab := 1 + arr
-					GuiControl, Choose,adhd_current_tab, %tab%
-					
-					control, check,,,% "ahk_id " QB_B_%A_Index%%tmp%
-					Gui, Submit, NoHide
-					
-					quickbind_selected()
-					return
+				} else {
+					; Regular button mapping
+					val := GetKeyState(value.id . "Joy" . value.button)
+					if (!val){
+						continue
+					}
 				}
+				; A mapped button (or hat mapped to button) was pressed
+				; Switch to tab and select QB radio for this button
+				if (A_Index > 16){
+					arr := 2
+					tmp := QuickBindButtons2
+				} else {
+					arr := 1
+					tmp := QuickBindButtons1
+				}
+				tab := 1 + arr
+				GuiControl, Choose,adhd_current_tab, %tab%
+				
+				control, check,,,% "ahk_id " QB_B_%A_Index%%tmp%
+				Gui, Submit, NoHide
+				
+				tab_changed_hook()
+				
+				quickbind_selected()
+				return
 			}
 		}
 		
@@ -861,9 +876,12 @@ quickbind_select(){
 						}
 						; Switch to tab and select QB radio for this button
 						GuiControl, Choose,adhd_current_tab, 4
+						tab_changed_hook()
 						
 						control, check,,,% "ahk_id " QB_H_%A_Index%
 						Gui, Submit, NoHide
+						
+						tab_changed_hook()
 						
 						quickbind_selected()
 						return
@@ -885,6 +903,8 @@ quickbind_select(){
 					ax := value.axis
 					control, check,,,% "ahk_id " QB_A_%ax%
 					Gui, Submit, NoHide
+					
+					tab_changed_hook()
 					
 					quickbind_selected()
 					return
