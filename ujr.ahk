@@ -795,7 +795,16 @@ quickbind_select(){
 	
 	quickbind_start := A_TickCount
 	last_beep := 0
+
+	joystate := Array()
 	
+	; Store starting state of axes for later comparison.
+	; If user has a throttle, it may be set at full...
+	For index, value in axis_mapping {
+		joystate[index] := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
+		;msgbox % joystate[value.id]
+	}
+
 	Loop, {
 		if (A_TickCount >= (quickbind_start + 5000)){
 			return
@@ -852,14 +861,12 @@ quickbind_select(){
 		}
 
 		For index, value in axis_mapping {
-			; ToDo: Store initial value and compare to that? ie if throttle is at max, will trigger this code.
 			if (virtual_axis_id_%index% != "None"){
 				; Main section for active axes
 				; Get input value
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
 				
-				tmp := round((val-50)*2,2)
-				if (abs(tmp) > 75){
+				if (abs(val - joystate[index]) > 37.5){
 					; Switch to tab and select QB radio for this button
 					GuiControl, Choose,adhd_current_tab, 1
 					
