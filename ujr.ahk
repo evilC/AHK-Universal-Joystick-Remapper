@@ -333,13 +333,12 @@ Loop, %virtual_hats% {
 	Gui, Add, Radio, x250 y160 gQuickBindOptionChanged hwndQB_H_4
 }
 
-; QUICKSET
+; AUTO CONFIGURE
 ; ---------------------
 Gui, Tab
 
-Gui, Add, Button, x440 y339 vQuickSetButton gQuickSetPressed, Quick Set to Stick ID
-;Gui, Add, Button, x400 y339 vQuickSetButton gQuickSetButtons, Quick Set Buttons to Stick ID
-Gui, Add, DropDownList, x560 yp+1 w30 vQuickSetID, 1||2|3|4|5|6|7|8
+Gui, Add, Button, x430 y339 vAutoConfigureButton gAutoConfigurePressed, Auto Configure Stick ID
+Gui, Add, DropDownList, x560 yp+1 w30 vAutoConfigureID, 1||2|3|4|5|6|7|8
 
 ; QUICKBIND FOOTER
 ; ---------------------
@@ -598,8 +597,8 @@ tab_changed_hook(){
 	GuiControl, +Hidden, QuickBindLabelAxisType
 	GuiControl, +Hidden, QuickBindAxisType
 	GuiControl, +Hidden, QuickBindLabelInstructions
-	GuiControl, +Hidden, QuickSetID
-	GuiControl, +Hidden, QuickSetButton
+	GuiControl, +Hidden, AutoConfigureID
+	GuiControl, +Hidden, AutoConfigureButton
 
 	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
 		GuiControl, -Hidden, QuickBindLabelGroup
@@ -611,11 +610,11 @@ tab_changed_hook(){
 		if (adhd_current_tab == "Axes"){
 			GuiControl, -Hidden, QuickBindLabelAxisType
 			GuiControl, -Hidden, QuickBindAxisType
-			GuiControl, -Hidden, QuickSetButton
-			GuiControl, -Hidden, QuickSetID
+			GuiControl, -Hidden, AutoConfigureButton
+			GuiControl, -Hidden, AutoConfigureID
 		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
-			GuiControl, -Hidden, QuickSetButton
-			GuiControl, -Hidden, QuickSetID
+			GuiControl, -Hidden, AutoConfigureButton
+			GuiControl, -Hidden, AutoConfigureID
 		} else if (adhd_current_tab == "Hats"){
 		
 		}
@@ -914,28 +913,26 @@ play_quickbind_delay(){
 	return
 }
 
-QuickSetPressed:
+AutoConfigurePressed:
 	if (adhd_current_tab == "Axes"){
-		quickset_axes()
-		;Gosub, QuickSetAxes
+		auto_configure_axes()
 	} else {
-		;Gosub, QuickSetButtons
-		quickset_buttons()
+		auto_configure_buttons()
 	}
 	return
 	
-quickset_axes(){
+auto_configure_axes(){
 	Global ADHD
-	Global QuickSetID
+	Global AutoConfigureID
 	Global axis_list_ahk
 	
 	Gui, Submit, NoHide
 	; ToDo: Detect how many axes the physical stick has, and only map those
 	; AHK only supports 6 axes per stick, so just populate lines 1-6
 	Loop, 6 {
-		if (GetKeyState(QuickSetID . "Joy" . axis_list_ahk[A_Index]) != ""){
+		if (GetKeyState(AutoConfigureID . "Joy" . axis_list_ahk[A_Index]) != ""){
 			GuiControl, choosestring,virtual_axis_id_%A_Index%, %A_Index%
-			GuiControl, choosestring,axis_physical_stick_id_%A_Index%, %QuickSetID%
+			GuiControl, choosestring,axis_physical_stick_id_%A_Index%, %AutoConfigureID%
 			GuiControl, choosestring,physical_axis_id_%A_Index%, %A_Index%
 		}
 	}
@@ -943,14 +940,14 @@ quickset_axes(){
 	return
 }
 
-quickset_buttons(){
+auto_configure_buttons(){
 	Global ADHD
-	Global QuickSetID
+	Global AutoConfigureID
 	Global virtual_buttons
 
 	Loop, %virtual_buttons% {
 		Gui, Submit, NoHide
-		GuiControl, choosestring,button_physical_stick_id_%A_Index%, %QuickSetID%
+		GuiControl, choosestring,button_physical_stick_id_%A_Index%, %AutoConfigureID%
 		GuiControl, choosestring,button_id_%A_Index%, %A_Index%
 	}
 	ADHD.option_changed()
