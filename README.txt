@@ -27,12 +27,12 @@ You can always drag a shortcut to ujr.exe anywhere you like though.
 
 Usage Instructions:
 
-Stage 1 - Initial testing
+Stage 1 - Initial setup
 -------------------------
 1) Make sure a joystick is plugged in and Double click ujr.exe - you should see a GUI.
 2) Go into the Bindings tab and bind something to QuickBind. In this example I sall assume you used F2
-   eg to bind to F2: Tick "Program Mode", click the mouse in the box on the "QuickBind" row in the "Keyboard" column
-   Hit F2, untick "Program Mode"
+   eg to bind to F2: Tick "Program Mode", click the mouse in the box on the "QuickBind" row in the "Keyboard" column, then Hit F2
+   IMPORTANT!! When done changing bindings, ALWAYS be sure to untick "Program Mode"
 3) Go to the "Axes" tab.
    There are 8 rows in this tab, each representing an axis on the virtual controller.
    On the first row, set "Virtual Axis" to 1, set "Phystical Stick ID" to 1 and "Physical Axis" to 1.
@@ -40,17 +40,39 @@ Stage 1 - Initial testing
    If the "State" slider does not move, change the "Physical Stick ID" dropdown to the next option and try again
    ie if 1 does not work, try 2, then 3 etc...
    When you find one that moves the slider, you have found the physical ID of the stick that you were moving.
-4) On the right is a "QB" column - this sets which axis to use for the QuickBind function. Make sure the 1st row is selected.
-   Open the joystick control panel (Start -> joy.cpl)
-   Double click the "vJoy Device" entry.
-   Hit F2 and wait. When you hear a beep, the stick should move. If it does, UJR has proper control of the virtual stick.
+4) Go to the Axes tab, and in the bottom right, set the "Auto Configure Stick ID" dropdown to the value of the physical stick you just found.
+   Click the "Auto Configure Stick ID" button to quickly configure the rest of the axes for you.
+   Change to the "Buttons 1" tab and click the button again to quickly configure the buttons.
+5) If your stick has a hat switch, go to the "Hats" tab and select the same stick ID from the dropdown.
 
-You have now set up your first axis mapping - repeat the process used in steps 3 and 4 for the remaining axes and buttons.
+Congratulations, your stick is now configured!
 
-The QuickBind function can also be used to map the virtual joystick to functions in games without the game detecting your physical stick.
-In UJR, make sure the QB indicator is on the row you wish to bind.
-To make the binding, tab into game and hit the QuickBind button, THEN activate the game's bind function.
-Once the game's bind function is waiting for input, leave everything alone and QuickBind will operate the virtual stick to make the binding.
+Open the joystick control panel (Start -> joy.cpl) and double click the "vJoy Device" entry.
+You should see the virtual stick mimicking the actions of your physical stick.
+
+The profiles menu can be used to create additional profiles - this allows you quickly change the configuration of UJR.
+
+Also bear in mind that the virtual joystick is always "plugged in". Always mapping games to the virtual stick gives you a nice benefit:
+If you start a game and forgot to plug your stick in, you only need to tab out and start up UJR and the stick will start working!
+
+
+Stage 2 - Binding to a game
+---------------------------
+Because of the fact that UJR does not hide your physical stick from games, they may pick up the physical stick when trying to bind the virtual stick.
+Before starting, you should bind something to "QuickBind Select" in the bindings tab.
+(Example assumes you used F3)
+
+1) Make sure that all the buttons you want to use are fully mapped to the virtual stick.
+2) Enter the game, open it's bindings menu and choose which input you wish to bind first.
+3) You want to bind the up axis first, so hit 'QuickBind Select' (F3) - a beeping will start.
+   You have until the beeping stops to hit up on your stick.
+4) Once you hit up, you should hear a high pitched confirmation beep - UJR is now ready to bind "up".
+5) Hit 'QuickBind' (F2) and you will hear a series of beeps getting higher. You have until these beeps ends to activate the game's bind function.
+   Before the beeps stop getting higher, double click the entry in the game's bind options that you wish to bind your up axis to.
+6) When the beeps stop rising, you will hear a single tone and UJR will move the stick up, which the game should see and make the binding.
+
+Repeat steps 3-6 for other axes or buttons.
+
 The Delay option for QuickBind will let you adjust how long it waits before manipulating the virtual stick.
 
 

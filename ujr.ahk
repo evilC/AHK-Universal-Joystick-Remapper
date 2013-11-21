@@ -357,10 +357,10 @@ QuickBindAxisType_TT := "How QuickBind moves the axis.`n`nMid-High just moves up
 
 tmp := "QuickBind Instructions:`n"
 tmp .= "Lets you bind the virtual stick in a game without having to move the physical stick.`n"
-tmp .= "Before using, make sure you have defined a QuickBind key in the Bindings tab.`n"
-tmp .= "1) Select the button or axis from the 'QB' column above that you wish to bind in-game`n"
-tmp .= "2) Choose options on the left (Hover over them to see what they do).`n"
-tmp .= "3) In-game, hit the the QuickBind key, then activate the game's bind function.`n"
+tmp .= "1) Ensure you have bound 'QuickBind' and 'QuickBind Select' in the Bindings tab.`n"
+tmp .= "2) Map the physical stick to the virtual stick as required, then enter the game.`n"
+tmp .= "3) Hit 'QuickBind Select' and move the axis or press the button you wish to bind.`n"
+tmp .= "4) Hit 'QuickBind', quickly activate the Game's bind function, then wait for the beep`n"
 tmp .= "    UJR will operate the axis or button, and the game should bind to the virtual stick."
 Gui, Add, Text, x190 y365 vQuickBindLabelInstructions, %tmp%
 

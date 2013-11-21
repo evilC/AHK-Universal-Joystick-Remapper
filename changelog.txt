@@ -6,6 +6,13 @@ Key:
 = : Change / Fix
 + : Added feature
 
+5.1 21st Nov 2013
++ Added "QuickBind" function - bind game functions without leaving the game!
+  Instead of manually selecting an axis or button by using the QB radio button, you can use QuickSelect.
+  Bind QuickSelect to something, and when you hit it, press a button or move an axis.
+  The relevant axis or button will then be selected for you.
++ "Auto Configure" function - quickly set up a straight through mapping for all buttons or axes.
+
 5.0 20th Nov 2013
 * Rewrite using my ADHD library.
 ! Now intended to be used when compiled to an EXE - You no longer need AutoHotkey installed.
