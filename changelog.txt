@@ -6,6 +6,12 @@ Key:
 = : Change / Fix
 + : Added feature
 
+5.2 25th Nov 2013
+! Axis merging has changed!
+  It is now much less confusing to set up - configure each axis individually to move the slider in the direction desired.
+  eg set the left pedal to move the slider left (from a resting position all the way right), right pedal to move it right.
+  Then set both axes to the same virtual axis and enable merge - it should behave as expected.
+
 5.1 21st Nov 2013
 + Added "QuickBind" function - bind game functions without leaving the game!
   Instead of manually selecting an axis or button by using the QB radio button, you can use QuickSelect.
