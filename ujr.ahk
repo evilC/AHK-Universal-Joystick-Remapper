@@ -714,7 +714,7 @@ QuickBind:
 			axismap := axis_list_vjoy[value.virt_axis]
 			if (axismap != ""){
 				GuiControl,,axis_state_slider_%index%,50
-				VJoy_SetAxis(16384, vjoy_id, HID_USAGE_%axismap%)
+				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
 			}
 		}
 		
@@ -751,7 +751,7 @@ QuickBind:
 				;Sleep, % (QuickBindDuration * 1000 ) / 2
 			} else if (QuickBindAxisType == "Mid-High"){
 				GuiControl,,axis_state_slider_%QuickBindAxes%,50
-				VJoy_SetAxis(16384, vjoy_id, HID_USAGE_%axismap%)
+				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
 				GuiControl,,axis_state_slider_%QuickBindAxes%,100
@@ -759,7 +759,7 @@ QuickBind:
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 			} else {
 				GuiControl,,axis_state_slider_%QuickBindAxes%,50
-				VJoy_SetAxis(16384, vjoy_id, HID_USAGE_%axismap%)
+				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
 				GuiControl,,axis_state_slider_%QuickBindAxes%,0
