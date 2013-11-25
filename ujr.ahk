@@ -42,7 +42,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "5.2", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "5.3", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ;ADHD.config_default_app("CryENGINE")
@@ -407,6 +407,9 @@ Loop{
 				; Set the value for this axis on the virtual stick
 				axismap := axis_list_vjoy[value.virt_axis]
 
+				; rescale to vJoy style 0->32767
+				val := val * 327.67
+				
 				ax := value.axis
 				if (value.merge != "None"){
 					if (merged_axes[%ax%] == -1){
@@ -414,11 +417,11 @@ Loop{
 					} else {
 						;val := ((val/2)+50) + ((merged_axes[%ax%]/2) * -1)
 						val := (val + merged_axes[%ax%]) / 2
+						VJoy_SetAxis(val, vjoy_id, HID_USAGE_%axismap%)
 					}
+				} else {
+					VJoy_SetAxis(val, vjoy_id, HID_USAGE_%axismap%)
 				}
-				; rescale to vJoy style 0->32767
-				val := val * 327.67
-				VJoy_SetAxis(val, vjoy_id, HID_USAGE_%axismap%)
 
 			} else {
 				; Blank out unused axes

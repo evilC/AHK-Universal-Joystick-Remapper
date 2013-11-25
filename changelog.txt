@@ -6,6 +6,13 @@ Key:
 = : Change / Fix
 + : Added feature
 
+5.3 25th Nov 2013
+= Reduced likelihood of a merged axis "kicking" in one direction.
+  Previously, when building the virtual axis, the value of the first axis would be applied,
+  then the value of the second axis would be averaged in and the virtual axis would be set again.
+  This could result in jerky movement if there was too long between the two physical axes being processed.
+  The virtual axis is now only set when both physical axes have been read and added together.
+
 5.2 25th Nov 2013
 ! Axis merging has changed!
   It is now much less confusing to set up - configure each axis individually to move the slider in the direction desired.
