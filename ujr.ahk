@@ -99,6 +99,10 @@ LoadPackagedLibrary() {
 LoadPackagedLibrary()
 vjoy_id := 1
 VJoy_Init(vjoy_id)
+if (!VJoy_Ready(vjoy_id)){
+	msgbox The vJoy virtual joystick is already being controlled by something else.`n`nExiting...
+	ExitApp
+}
 
 ; Init stick vars for AHK
 axis_list_ahk := Array("X","Y","Z","R","U","V")
