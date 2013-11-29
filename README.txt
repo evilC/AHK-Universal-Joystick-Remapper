@@ -81,11 +81,13 @@ Advanced
 
 Source code - The ujr.ahk file in the zip is the source code. In order to use this, you will also need my ADHD library.
 
-Axis Merging - Use this to merge two axes on to one.
-eg You have racing pedals where each pedal is a seperate axis and you want to simulate one axis (like a rudder)
-To use, set TWO rows to the SAME "Virtual Axis" and set the "Axis Merging" column to "On" in both rows
+Axis Merging - Use this to merge two axes on to one, for example to merge two pedals into one rudder.
+It is NOT recommended for input axes that rest in a neutral position, it is intended for axes that rest at one end (eg pedals).
+To use, start off by setting up your two input axes separately such that each moves the slider in a different direction.
+For example, have your left pedal on virtual axis 1, and set it up so that the idle position is all the way right and fully pressed is all the way left.
+Then set up the right pedal on virtual axis 2, and have it move the slider left.
+Once that works, set both input axes to the same virtual axis, and turn Axis Merging on for both axes.
 DO NOT enable deadzone for any merged row
-If you need to invert the merged axis, invert BOTH rows
 Bear in mind this is intended for merging axes that normally sit at one end of the scale (like a pedal) rather than in the middle (like a stick)
 Merging two sticks will have strange results.
 
