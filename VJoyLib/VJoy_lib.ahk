@@ -354,7 +354,6 @@ Class VJoyDev {
 }
  
 VJoy_init(id := 1) {
-	id := 1
     Global VJDev, VJD_MAXDEV
     if (id < 1 || id > VJD_MAXDEV) {
         MsgBox, [%A_ThisFunc%] Device %id% is invalid. Please specify 1-%VJD_MAXDEV%.

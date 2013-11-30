@@ -6,6 +6,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+5.4 30th Nov 2013
+= Modification to VJoy library - it can now correctly control virtual stick IDs other than 1.
+  No actual changes to UJR, but it would now be easy to make UJR control any virtual stick ID (Currently thru a code edit).
+
 5.3 25th Nov 2013
 = Reduced likelihood of a merged axis "kicking" in one direction.
   Previously, when building the virtual axis, the value of the first axis would be applied,

@@ -42,7 +42,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "5.3", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "5.4", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ;ADHD.config_default_app("CryENGINE")
