@@ -1,4 +1,5 @@
 ; VJoy_lib.ahk Ver1.1
+; Original code by Axlar - http://www.autohotkey.com/board/topic/87690-
 ; modded by evilC - VJoy_SetAxis fix (Bad ternary operator)
  
     VJD_MAXDEV := 16
