@@ -402,7 +402,7 @@ Loop{
 				GuiControl,, axis1_controls_state_slider_%index%, % val
 				
 				; Set the value for this axis on the virtual stick
-				axismap := axis_list_vjoy[value.virt_axis]
+				axismap := axis_list_vjoy[index]
 
 				; rescale to vJoy style 0->32767
 				val := val * 327.67
@@ -705,7 +705,6 @@ option_changed_hook(){
 			GuiControl, %tmp%, axis%A_Index%_controls_deadzone_%ax%
 			GuiControl, %tmp%, axis%A_Index%_controls_sensitivity_%ax%
 		}
-		axis_mapping[A_Index].virt_axis := A_Index
 
 		axis_mapping[A_Index].merge := axis1_controls_merge_%A_Index%
 
@@ -812,7 +811,7 @@ QuickBind:
 
 		; set all configured axes to neutral position
 		For index, value in axis_mapping {
-			axismap := axis_list_vjoy[value.virt_axis]
+			axismap := axis_list_vjoy[index]
 			if (axismap != ""){
 				GuiControl,,axis1_controls_state_slider_%index%,50
 				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
@@ -834,8 +833,7 @@ QuickBind:
 		; Find which tab we are on and which control is selected, then move it after a delay
 		if (adhd_current_tab == "Axes 1"){
 			; Check axis is mapped
-			value := axis_mapping[QuickBindAxes]
-			axismap := axis_list_vjoy[value.virt_axis]
+			axismap := axis_list_vjoy[axis_mapping[QuickBindAxes]]
 			if (axismap == ""){
 				return
 			}
