@@ -5,7 +5,7 @@ ToDo:
 
 Before next release:
 Add INI version to ADHD so we can warn to remove old INI
-
+ADHD not changing current profile when copying profile? Copy profile, exit, reload and on default
 
 Known Issues:
 Cater for case where non-existant vjoy id is selected on load.
@@ -116,10 +116,6 @@ axis_mapping2 := Array()
 button_mapping := Array()
 hat_mapping := Array()
 
-; When axes are to be merged - the first axis to be processed stores it's value in this array
-; The second axis can then use the value in here to merge with the first axis
-merged_axes := Array()
-
 ; The "Axes 1" tab is tab 1
 Gui, Tab, 1
 
@@ -166,7 +162,7 @@ Loop, 2 {
 		tmp := axis_list_vjoy[A_Index]
 		Gui, Add, Text, x25 y%ypos3% w35 Center, ( %tmp% )
 		
-		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
+		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_special_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
 		
 		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
 		axis%tabnum%_controls_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
@@ -378,11 +374,6 @@ tab_changed_hook()
 ; =============================================================================================================================
 ; MAIN LOOP - controls the virtual stick
 Loop{
-	; Clear axes - for axis merging, we need each axis to start at -1 so we know if we have altered it yet
-	Loop, %virtual_axes% {
-		merged_axes[%A_Index%] := -1
-	}
-	
 	if (!quick_bind_mode){
 		; Cycle through rows. MAY NOT BE IN ORDER OF VIRTUAL AXES!
 		For index, value in axis_mapping1 {
@@ -390,33 +381,49 @@ Loop{
 				; Main section for active axes
 				; Get input value
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
+				axis2_configured := axis_mapping2[index].id != "None" && axis_mapping2[index].axis != "None"
+				if (axis_mapping2[index].special == "On"){
+					merge := 1
+				} else {
+					merge := 0
+				}
+				if (axis2_configured){
+					val2 := GetKeyState(axis_mapping2[index].id . "Joy" . axis_list_ahk[axis_mapping2[index].axis])
+				}
 
 				; Display input value, rescale to -100 to +100
 				GuiControl,, axis1_controls_physical_value_%index%, % round((val-50)*2,2)
+				if (axis2_configured){
+					GuiControl,, axis2_controls_physical_value_%index%, % round((val2-50)*2,2)
+				}
 				
 				; Adjust axis according to invert / deadzone options etc
 				val := AdjustAxis(val,value)
+				if (axis2_configured){
+					val2 := AdjustAxis(val2,axis_mapping2[index])
+				}
 				
 				; Display output value, rescale to -100 to +100
 				GuiControl,, axis1_controls_virtual_value_%index%, % round((val-50)*2,2)
+				if (axis2_configured){
+					GuiControl,, axis2_controls_virtual_value_%index%, % round((val2-50)*2,2)
+				}
 				; Move slider to show input value
 				GuiControl,, axis1_controls_state_slider_%index%, % val
-				
+				if (axis2_configured){
+					GuiControl,, axis2_controls_state_slider_%index%, % val2
+				}
 				; Set the value for this axis on the virtual stick
 				axismap := axis_list_vjoy[index]
 
 				; rescale to vJoy style 0->32767
 				val := val * 327.67
+				val2 := val2 * 327.67
 				
 				ax := value.axis
-				if (value.merge != "None"){
-					if (merged_axes[%ax%] == -1){
-						merged_axes[%ax%] := val
-					} else {
-						;val := ((val/2)+50) + ((merged_axes[%ax%]/2) * -1)
-						val := (val + merged_axes[%ax%]) / 2
-						VJoy_SetAxis(val, vjoy_id, HID_USAGE_%axismap%)
-					}
+				if (merge){
+					val2 := (val + val2) / 2
+					VJoy_SetAxis(val2, vjoy_id, HID_USAGE_%axismap%)
 				} else {
 					VJoy_SetAxis(val, vjoy_id, HID_USAGE_%axismap%)
 				}
@@ -700,25 +707,14 @@ option_changed_hook(){
 				tmp := "disable"
 			}
 			
-			/*
-			ax := A_Index
-			Loop, 2 {
-				GuiControl, %tmp%, axis%A_Index%_controls_merge_%ax%
-				GuiControl, %tmp%, axis%A_Index%_controls_physical_stick_id_%ax%
-				GuiControl, %tmp%, axis%A_Index%_controls_physical_axis_%ax%
-				GuiControl, %tmp%, axis%A_Index%_controls_invert_%ax%
-				GuiControl, %tmp%, axis%A_Index%_controls_deadzone_%ax%
-				GuiControl, %tmp%, axis%A_Index%_controls_sensitivity_%ax%
-			}
-			*/
-			GuiControl, %tmp%, axis%map%_controls_merge_%A_Index%
+			GuiControl, %tmp%, axis%map%_controls_special_%A_Index%
 			GuiControl, %tmp%, axis%map%_controls_physical_stick_id_%A_Index%
 			GuiControl, %tmp%, axis%map%_controls_physical_axis_%A_Index%
 			GuiControl, %tmp%, axis%map%_controls_invert_%A_Index%
 			GuiControl, %tmp%, axis%map%_controls_deadzone_%A_Index%
 			GuiControl, %tmp%, axis%map%_controls_sensitivity_%A_Index%
 
-			axis_mapping%map%[A_Index].merge := axis%map%_controls_merge_%A_Index%
+			axis_mapping%map%[A_Index].special := axis%map%_controls_special_%A_Index%
 
 			axis_mapping%map%[A_Index].id := axis%map%_controls_physical_stick_id_%A_Index%
 
