@@ -430,7 +430,7 @@ Loop{
 		}
 		
 		For index, value in button_mapping {
-			if (button_mapping[index].id != "None" && button_mapping[index].button != "None" && vjoy_ready){
+			if (button_mapping[index].id != "None" && button_mapping[index].button != "None" && vjoy_ready && value.exists){
 				if (value.pov){
 					; get current state of pov in val
 					val := PovToAngle(GetKeyState(value.id . "Joy" . "POV"))
@@ -446,7 +446,7 @@ Loop{
 		}
 		
 		For index, value in hat_mapping {
-			if (hat_mapping[index].id != "None" && vjoy_ready){
+			if (hat_mapping[index].id != "None" && vjoy_ready && value.exists){
 				val := GetKeyState(value.id . "Joy" . "POV")
 				Loop, 4 {
 					if (PovMatchesAngle(PovToAngle(val), hat_axes[A_Index])){
@@ -660,13 +660,11 @@ option_changed_hook(){
 			GuiControl, +Cred, virtual_stick_status
 			GuiControl, , virtual_stick_status, Already Owned by this app (Should not see this!)
 		}
-		;msgbox % DllCall("vJoyInterface\GetVJDStatus", "UInt", vjoy_id)
 		if (vjoy_status <= 1){
 			VJoy_Init(vjoy_id)
 			
 			; Seem to need this to allow reconnecting to sticks (ie you selected id 1 then 2 then 1 again. Else control of stick does not resume
 			VJoy_AcquireVJD(vjoy_id)
-			;DllCall("vJoyInterface\SetVJDStatus", "UInt", 0)
 			VJoy_ResetVJD(vjoy_id)
 			if (VJoy_Ready(vjoy_id)){
 				vjoy_ready := 1
@@ -676,8 +674,6 @@ option_changed_hook(){
 				GuiControl, +Cred, virtual_stick_status
 				GuiControl, , virtual_stick_status, Problem Connecting
 				vjoy_ready := 0
-				;return
-				;ExitApp
 			}
 		} else {
 			vjoy_ready := 0
@@ -692,10 +688,10 @@ option_changed_hook(){
 		tmp := axis_list_vjoy[A_Index]
 
 		; Detect if this axis is present on the virtual stick
-		if (!VJoy_Ready(vjoy_id)){
-			axis_mapping[A_Index].exists := false
-		} else {
+		if (VJoy_Ready(vjoy_id)){
 			axis_mapping[A_Index].exists := VJoy_GetAxisExist_%tmp%(virtual_stick_id)
+		} else {
+			axis_mapping[A_Index].exists := false
 		}
 		
 		; Enable / Disable controls
@@ -741,8 +737,32 @@ option_changed_hook(){
 	}
 
 	button_mapping := Array()
+	
+	; Detect how many buttons are present on the virtual stick
+	if (VJoy_Ready(vjoy_id)){
+		btns := VJoy_GetVJDButtonNumber(vjoy_id)
+	} else {
+		btns := 0
+	}
+
 	Loop, %virtual_buttons% {
 		button_mapping[A_Index] := Object()
+		
+		if (btns >= A_Index){
+			button_mapping[A_Index].exists := true
+		} else {
+			button_mapping[A_Index].exists := false
+		}
+		
+		; Enable / Disable controls
+		if (button_mapping[A_Index].exists){
+			tmp := "enable"
+		} else {
+			tmp := "disable"
+		}
+		GuiControl, %tmp%, button_physical_stick_id_%A_Index%
+		GuiControl, %tmp%, button_id_%A_Index%
+
 		
 		button_mapping[A_Index].id := button_physical_stick_id_%A_Index%
 		
