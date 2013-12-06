@@ -2,6 +2,13 @@
 
 ; ToDo:
 ; =====
+; Allow selection of vjoy id
+
+; Cater for case where non-existant vjoy id is selected on load.
+; Should gracefully load and allow user to change ID
+
+; Check presence of features (Hat settings always showing even if virt stick has no hat)
+
 ; Replace / Add axis splitting? Move to right of Physical Axis?
 
 ; Make QuickBind settings persistent? Per-Profile?
