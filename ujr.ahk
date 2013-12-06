@@ -136,11 +136,15 @@ Gui, Tab, 1
 gui_width := 600
 w:=gui_width-10
 
-th1 := 45
+th1 := 65
 th2 := th1+5
 
 ; AXES TAB
 ; --------
+
+Gui, Add, Text, x10 y35, vJoy Stick ID
+ADHD.gui_add("DropDownList", "virtual_stick_id" A_Index, "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
+
 Gui, Add, Text, x20 y%th1% w30 R2 Center, Virtual Axis
 Gui, Add, Text, x70 y%th1% w50 R2 Center, Axis Merging
 Gui, Add, Text, x125 y%th1% w60 R2 Center, Physical Stick ID
@@ -155,7 +159,7 @@ Gui, Add, Text, x568 y%th2% w20 h20 Center, QB
 
 tmp := 0
 
-Gui, Add, GroupBox, x5 y30 w585 h310,
+Gui, Add, GroupBox, x5 y50 w585 h290,
 Loop, %virtual_axes% {
 	ypos := 70 + A_Index * 30
 	ypos2 := ypos + 5
@@ -203,7 +207,7 @@ Loop, %virtual_buttons% {
 
 		Gui, Tab, %button_tab%
 		xpos := 5 + ((button_column - 1) * 295)
-		Gui, Add, GroupBox, x%xpos% y30 w290 h310,
+		Gui, Add, GroupBox, x5 y50 w585 h290,
 		
 		xbase := ((button_column - 1) * 300)
 		xpos := xbase + 20
