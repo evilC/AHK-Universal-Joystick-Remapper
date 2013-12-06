@@ -688,18 +688,14 @@ option_changed_hook(){
 		tmp := axis_list_vjoy[A_Index]
 
 		; Detect if this axis is present on the virtual stick
-		if (VJoy_Ready(vjoy_id)){
+		if (vjoy_ready){
 			axis_mapping[A_Index].exists := VJoy_GetAxisExist_%tmp%(virtual_stick_id)
-		} else {
-			axis_mapping[A_Index].exists := false
-		}
-		
-		; Enable / Disable controls
-		if (axis_mapping[A_Index].exists){
 			tmp := "enable"
 		} else {
+			axis_mapping[A_Index].exists := false
 			tmp := "disable"
 		}
+		
 		ax := A_Index
 		Loop, 2 {
 			GuiControl, %tmp%, axis%A_Index%_controls_merge_%ax%
@@ -739,7 +735,7 @@ option_changed_hook(){
 	button_mapping := Array()
 	
 	; Detect how many buttons are present on the virtual stick
-	if (VJoy_Ready(vjoy_id)){
+	if (vjoy_ready){
 		btns := VJoy_GetVJDButtonNumber(vjoy_id)
 	} else {
 		btns := 0
@@ -750,16 +746,13 @@ option_changed_hook(){
 		
 		if (btns >= A_Index){
 			button_mapping[A_Index].exists := true
+			tmp := "enable"
 		} else {
 			button_mapping[A_Index].exists := false
+			tmp := "disable"
 		}
 		
 		; Enable / Disable controls
-		if (button_mapping[A_Index].exists){
-			tmp := "enable"
-		} else {
-			tmp := "disable"
-		}
 		GuiControl, %tmp%, button_physical_stick_id_%A_Index%
 		GuiControl, %tmp%, button_id_%A_Index%
 
@@ -776,11 +769,25 @@ option_changed_hook(){
 		}
 		button_mapping[A_Index].button := button_id_%A_Index%
 	}
+
+	if (vjoy_ready){
+		hats := VJoy_GetContPovNumber(vjoy_id)
+	} else {
+		hats := 0
+	}
 	
 	hat_mapping := Array()
 	Loop, %virtual_hats% {
 		hat_mapping[A_Index] := Object()
 		
+		if (hats >= A_Index){
+			hat_mapping[A_Index].exists := true
+			tmp := "enable"
+		} else {
+			hat_mapping[A_Index].exists := false
+			tmp := "disable"
+		}
+		GuiControl, %tmp%, hat_physical_stick_id_%A_Index%
 		hat_mapping[A_Index].id := hat_physical_stick_id_%A_Index%
 	}
 	
