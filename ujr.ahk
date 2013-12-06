@@ -168,7 +168,9 @@ Loop, 2 {
 		ypos3 := ypos + 3
 		;ADHD.gui_add("DropDownList", "virtual_axis_id_" A_Index, "x10 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
 		;virtual_axis_id_%A_Index%_TT := "Makes this row map to the selected virtual axis"
-		Gui, Add, Text, x30 y%ypos3% Center, %A_Index%
+		Gui, Add, Text, x10 y%ypos3% Center, %A_Index%
+		tmp := axis_list_vjoy[A_Index]
+		Gui, Add, Text, x25 y%ypos3% w35 Center, ( %tmp% )
 		
 		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
 		
@@ -653,6 +655,21 @@ option_changed_hook(){
 		; Detect if this axis is present on the virtual stick
 		axis_mapping[A_Index].exists := VJoy_GetAxisExist_%tmp%(virtual_stick_id)
 		
+		; Enable / Disable controls
+		if (axis_mapping[A_Index].exists){
+			tmp := "enable"
+		} else {
+			tmp := "disable"
+		}
+		ax := A_Index
+		Loop, 2 {
+			GuiControl, %tmp%, axis%A_Index%_controls_merge_%ax%
+			GuiControl, %tmp%, axis%A_Index%_controls_physical_stick_id_%ax%
+			GuiControl, %tmp%, axis%A_Index%_controls_physical_axis_%ax%
+			GuiControl, %tmp%, axis%A_Index%_controls_invert_%ax%
+			GuiControl, %tmp%, axis%A_Index%_controls_deadzone_%ax%
+			GuiControl, %tmp%, axis%A_Index%_controls_sensitivity_%ax%
+		}
 		;axis_mapping[A_Index].virt_axis := virtual_axis_id_%A_Index%
 		axis_mapping[A_Index].virt_axis := A_Index
 
