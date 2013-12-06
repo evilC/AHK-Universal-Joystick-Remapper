@@ -78,20 +78,8 @@ ADHD.create_gui()
 ; Init the PPJoy / vJoy library
 #include VJoyLib\VJoy_lib.ahk
 
-LoadPackagedLibrary() {
-    if (A_PtrSize < 8) {
-        dllpath = VJoyLib\x86\vJoyInterface.dll
-    } else {
-        dllpath = VJoyLib\x64\vJoyInterface.dll
-    }
-    hDLL := DLLCall("LoadLibrary", "Str", dllpath)
-    if (!hDLL) {
-        MsgBox, [%A_ThisFunc%] LoadLibrary %dllpath% fail
-    }
-    return hDLL
-} 
-
 LoadPackagedLibrary()
+
 vjoy_id := 1
 VJoy_Init(vjoy_id)
 if (!VJoy_Ready(vjoy_id)){
@@ -133,247 +121,24 @@ Gui, Tab, 1
 ; ============================================================================================
 ; GUI SECTION
 
-gui_width := 600
-w:=gui_width-10
-
-th1 := 65
-th2 := th1+5
-
-; AXES TAB
-; --------
-
 Gui, Add, Text, x10 y35, vJoy Stick ID
 ADHD.gui_add("DropDownList", "virtual_stick_id" A_Index, "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
 
-Gui, Add, Text, x20 y%th1% w30 R2 Center, Virtual Axis
-Gui, Add, Text, x70 y%th1% w50 R2 Center, Axis Merging
-Gui, Add, Text, x125 y%th1% w60 R2 Center, Physical Stick ID
-Gui, Add, Text, x185 y%th1% w60 R2 Center, Physical Axis
-Gui, Add, Text, x240 y%th2% w100 h20 Center, State
-Gui, Add, Text, x335 y%th2% w40 h20 Center, Invert
-Gui, Add, Text, x380 y%th2% w50 R2 Center, % "Deadzone %"
-Gui, Add, Text, x435 y%th2% w50 R2 Center, % "Sensitivity %"
-Gui, Add, Text, x485 y%th2% w50 h20 Center, Physical
-Gui, Add, Text, x530 y%th2% w40 h20 Center, Virtual
-Gui, Add, Text, x568 y%th2% w20 h20 Center, QB
-
-tmp := 0
-
-Gui, Add, GroupBox, x5 y50 w585 h290,
-Loop, %virtual_axes% {
-	ypos := 70 + A_Index * 30
-	ypos2 := ypos + 5
-	ADHD.gui_add("DropDownList", "virtual_axis_id_" A_Index, "x10 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
-	virtual_axis_id_%A_Index%_TT := "Makes this row map to the selected virtual axis"
-	
-	ADHD.gui_add("DropDownList", "virtual_axis_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
-	
-	ADHD.gui_add("DropDownList", "axis_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
-	axis_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
-	
-	ADHD.gui_add("DropDownList", "physical_axis_id_" A_Index, "x190 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
-	physical_axis_id_%A_Index%_TT := "Selects which axis to use on the selected physical stick"
-	
-	Gui, Add, Slider, x240 y%ypos% w100 h20 vaxis_state_slider_%A_Index%
-	axis_state_slider_%A_Index%_TT := "Shows the state of this axis"
-	
-	ADHD.gui_add("CheckBox", "virtual_axis_invert_" A_Index, "x345 y" ypos " w20 h20", "", 0)
-	virtual_axis_invert_%A_Index%_TT := "Inverts this axis"
-	
-	ADHD.gui_add("Edit", "virtual_axis_deadzone_" A_Index, "x385 y" ypos " w40 h21", "", 0)
-	virtual_axis_deadzone_%A_Index%_TT := "Applies a deadzone to this axis"
-	
-	ADHD.gui_add("Edit", "virtual_axis_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 100)
-	virtual_axis_sensitivity_%A_Index%_TT := "Adjusts sensitivity of this axis"
-	
-	Gui, Add, Text, x490 y%ypos% w40 h21 Center vphysical_value_%A_Index%, 0
-	Gui, Add, Text, x530 y%ypos% w40 h21 Center vvirtual_value_%A_Index%, 0
-}
-
-; BUTTONS TAB
-; -----------
-
-button_tab := 2
-button_row := 1
-button_column := 0
-
-Loop, %virtual_buttons% {
-	if (Mod(A_Index,8) == 1){
-		button_column++
-		if (button_column == 3){
-			button_column := 1
-			button_tab++
-		}
-
-		Gui, Tab, %button_tab%
-		xpos := 5 + ((button_column - 1) * 295)
-		Gui, Add, GroupBox, x5 y50 w585 h290,
-		
-		xbase := ((button_column - 1) * 300)
-		xpos := xbase + 20
-		Gui, Add, Text, x%xpos% y%th1% w20 R2 Center, Virt Btn
-		xpos := xbase + 62
-		Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, Stick ID
-		xpos := xbase + 132
-		Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, Button #
-		xpos := xbase + 205
-		Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, State
-		xpos := xbase + 268
-		Gui, Add, Text, x%xpos% y%th2% w20 h20 Center, QB
-
-		button_row = 1
-	}
-	ypos := 70 + button_row * 30
-	ypos2 := ypos + 5
-	xpos := xbase + 25
-	Gui, Add, Text, x%xpos% y%ypos2% w40 h20 , %A_Index%
-	
-	xpos := xbase + 62
-	ADHD.gui_add("DropDownList", "button_physical_stick_id_" A_Index, "x" xpos " y" ypos " w60 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
-	button_physical_stick_id_%A_Index%_TT := "Select the physical stick for this button"
-	
-	xpos := xbase + 132
-	ADHD.gui_add("DropDownList", "button_id_" A_Index, "x" xpos " y" ypos " w60 h10 R15", "None|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|POV U|POV D|POV L|POV R", "None")
-	button_id_%A_Index%_TT := "Select the button to use from the selected physical stick for this button"
-	
-	xpos := xbase + 220
-	Gui, Add, Text, x%xpos% y%ypos% w30 h20 vbutton_state_%A_Index% cred Center, Off
-	button_row++
-}
-
-; HATS TAB
-; --------
-
-Gui, Tab, 4
-
-Gui, Add, Text, x20 y%th1% w50 R2 Center, Hat Number
-Gui, Add, Text, x75 y%th1% w60 R2 Center, Physical Stick ID
-;Gui, Add, Text, x135 y%th1% w60 R2 Center, Hat ID
-
-button_row := 1
-ypos := 70 + button_row * 30
-ypos2 := ypos -3
-
-Loop, % virtual_hats {
-	Gui, Add, Text, x30 y%ypos% w40 h20 , Hat %A_Index%
-	ADHD.gui_add("DropDownList", "hat_physical_stick_id_" A_Index, "x80 y" ypos " w50 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
-
-	Gui, Add, Text, x150 y%th2% w40 Center, Direction
-	Gui, Add, Text, x205 yp Center, State
-	Gui, Add, Text, x248 yp Center, QB
-	
-	Gui, Add, Text, x150 y100 w40 Center, Up
-	Gui, Add, Text, x205 yp w30 h20 vhat_state_1 cred Center, Off
-
-	Gui, Add, Text, x150 y120 w40 Center, Down
-	Gui, Add, Text, x205 yp w30 h20 vhat_state_2 cred Center, Off
-
-	Gui, Add, Text, x150 y140 w40 Center, Left
-	Gui, Add, Text, x205 yp w30 h20 vhat_state_3 cred Center, Off
-
-	Gui, Add, Text, x150 y160 w40 Center, Right
-	Gui, Add, Text, x205 yp w30 h20 vhat_state_4 cred Center, Off
-	
-	button_row++
-}
-
-; QUICKBIND RADIOS
-; ---------------------
-; AHK cannot group radios if they are interspersed with other controls, so add them all in one go here.
-
-Gui, Tab, 1
-
-xpos := 560
-Loop, %virtual_axes% {
-	ypos := 70 + A_Index * 30
-	ypos2 := ypos + 5
-	tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged hwndQB_A_" A_Index
-	if (A_Index == 1){
-		tmp := tmp " vQuickBindAxes Checked"
-	}
-	Gui, Add, Radio, %tmp%
-}
-
-button_tab := 2
-button_row := 1
-button_column := 0
-
-Loop, %virtual_buttons% {
-	if (Mod(A_Index,8) == 1){
-		button_column++
-		if (button_column == 3){
-			button_column := 1
-			button_tab++
-		}
-		Gui, Tab, %button_tab%
-		xbase := ((button_column - 1) * 300)
-		button_row := 1
-	}
-	ypos := 70 + button_row * 30
-	ypos2 := ypos + 5
-	xpos := xbase + 260
-	
-	;tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged"
-	tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged hwndQB_B_" A_Index
-	if (A_Index == 1 || A_Index == 17){
-		tmp := tmp " vQuickBindButtons" button_tab-1 " Checked"
-	}
-	Gui, Add, Radio, %tmp%
-	button_row++
-}
-
-Gui, Tab, 4
-
-Loop, %virtual_hats% {
-	; Create QuickBind menu for U/D/L/R
-	grp := " vQuickBindHats Checked"
-	
-	Gui, Add, Radio, x250 y100 gQuickBindOptionChanged hwndQB_H_1 %grp%
-	Gui, Add, Radio, x250 y120 gQuickBindOptionChanged hwndQB_H_2
-	Gui, Add, Radio, x250 y140 gQuickBindOptionChanged hwndQB_H_3
-	Gui, Add, Radio, x250 y160 gQuickBindOptionChanged hwndQB_H_4
-}
-
-; AUTO CONFIGURE
-; ---------------------
-Gui, Tab
-
-Gui, Add, Button, x430 y339 vAutoConfigureButton gAutoConfigurePressed, Auto Configure Stick ID
-Gui, Add, DropDownList, x560 yp+1 w30 vAutoConfigureID, 1||2|3|4|5|6|7|8
-
-; QUICKBIND FOOTER
-; ---------------------
-
-Gui, Add, GroupBox, x5 y355 w585 h105 vQuickBindLabelGroup, QuickBind
-		
-Gui, Add, Text, x10 y375 vQuickBindLabelDelay, Delay (seconds)
-Gui, Add, Edit, xp+100 yp-2 w70 vQuickBindDelay  gQuickBindOptionChanged, 1
-QuickBindDelay_TT := "The amount of time between you hitting the QuickBind key,`nand QuickBind starting to manipulate the axis or button"
-
-Gui, Add, Text, x10 y400 vQuickBindLabelDuration, Duration (seconds)
-Gui, Add, Edit, xp+100 yp-2 w70 vQuickBindDuration  gQuickBindOptionChanged, 1
-QuickBindDuration_TT := "The amount of time that QuickBind moves the axis or holds the button"
-
-Gui, Add, Text, x10 y425 vQuickBindLabelAxisType, Axis movement type
-Gui, Add, DropDownList, xp+100 yp-2 w70 vQuickBindAxisType gQuickBindOptionChanged, High-Low||Mid-High|Mid-Low
-QuickBindAxisType_TT := "How QuickBind moves the axis.`n`nMid-High just moves up.`nMid-Low just moves down.`nHigh-Low moves to both ends"
-
-tmp := "QuickBind Instructions:`n"
-tmp .= "Lets you bind the virtual stick in a game without having to move the physical stick.`n"
-tmp .= "1) Ensure you have bound 'QuickBind' and 'QuickBind Select' in the Bindings tab.`n"
-tmp .= "2) Map the physical stick to the virtual stick as required, then enter the game.`n"
-tmp .= "3) Hit 'QuickBind Select' and move the axis or press the button you wish to bind.`n"
-tmp .= "4) Hit 'QuickBind', quickly activate the Game's bind function, then wait for the beep`n"
-tmp .= "    UJR will operate the axis or button, and the game should bind to the virtual stick."
-Gui, Add, Text, x190 y365 vQuickBindLabelInstructions, %tmp%
-
-; End GUI creation section
-; ============================================================================================
+GoSub, BuildTabs
 
 ADHD.finish_startup()
 
 ; Fire tab changed at startup to init common portion
 tab_changed_hook()
+
+/*
+vjoy_id := 1
+VJoy_Init(vjoy_id)
+if (!VJoy_Ready(vjoy_id)){
+	msgbox The vJoy virtual joystick is already being controlled by something else.`n`nExiting...
+	ExitApp
+}
+*/
 
 ; =============================================================================================================================
 ; MAIN LOOP - controls the virtual stick
@@ -464,6 +229,243 @@ Loop{
 	Sleep, 10
 }
 return
+
+
+BuildTabs:
+	gui_width := 600
+	w:=gui_width-10
+
+	th1 := 65
+	th2 := th1+5
+
+	; AXES TAB
+	; --------
+
+	Gui, Add, Text, x20 y%th1% w30 R2 Center, Virtual Axis
+	Gui, Add, Text, x70 y%th1% w50 R2 Center, Axis Merging
+	Gui, Add, Text, x125 y%th1% w60 R2 Center, Physical Stick ID
+	Gui, Add, Text, x185 y%th1% w60 R2 Center, Physical Axis
+	Gui, Add, Text, x240 y%th2% w100 h20 Center, State
+	Gui, Add, Text, x335 y%th2% w40 h20 Center, Invert
+	Gui, Add, Text, x380 y%th2% w50 R2 Center, % "Deadzone %"
+	Gui, Add, Text, x435 y%th2% w50 R2 Center, % "Sensitivity %"
+	Gui, Add, Text, x485 y%th2% w50 h20 Center, Physical
+	Gui, Add, Text, x530 y%th2% w40 h20 Center, Virtual
+	Gui, Add, Text, x568 y%th2% w20 h20 Center, QB
+
+	tmp := 0
+
+	Gui, Add, GroupBox, x5 y50 w585 h290,
+	Loop, %virtual_axes% {
+		ypos := 70 + A_Index * 30
+		ypos2 := ypos + 5
+		ADHD.gui_add("DropDownList", "virtual_axis_id_" A_Index, "x10 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+		virtual_axis_id_%A_Index%_TT := "Makes this row map to the selected virtual axis"
+		
+		ADHD.gui_add("DropDownList", "virtual_axis_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
+		
+		ADHD.gui_add("DropDownList", "axis_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+		axis_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
+		
+		ADHD.gui_add("DropDownList", "physical_axis_id_" A_Index, "x190 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+		physical_axis_id_%A_Index%_TT := "Selects which axis to use on the selected physical stick"
+		
+		Gui, Add, Slider, x240 y%ypos% w100 h20 vaxis_state_slider_%A_Index%
+		axis_state_slider_%A_Index%_TT := "Shows the state of this axis"
+		
+		ADHD.gui_add("CheckBox", "virtual_axis_invert_" A_Index, "x345 y" ypos " w20 h20", "", 0)
+		virtual_axis_invert_%A_Index%_TT := "Inverts this axis"
+		
+		ADHD.gui_add("Edit", "virtual_axis_deadzone_" A_Index, "x385 y" ypos " w40 h21", "", 0)
+		virtual_axis_deadzone_%A_Index%_TT := "Applies a deadzone to this axis"
+		
+		ADHD.gui_add("Edit", "virtual_axis_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 100)
+		virtual_axis_sensitivity_%A_Index%_TT := "Adjusts sensitivity of this axis"
+		
+		Gui, Add, Text, x490 y%ypos% w40 h21 Center vphysical_value_%A_Index%, 0
+		Gui, Add, Text, x530 y%ypos% w40 h21 Center vvirtual_value_%A_Index%, 0
+	}
+
+	; BUTTONS TAB
+	; -----------
+
+	button_tab := 2
+	button_row := 1
+	button_column := 0
+
+	Loop, %virtual_buttons% {
+		if (Mod(A_Index,8) == 1){
+			button_column++
+			if (button_column == 3){
+				button_column := 1
+				button_tab++
+			}
+
+			Gui, Tab, %button_tab%
+			xpos := 5 + ((button_column - 1) * 295)
+			Gui, Add, GroupBox, x5 y50 w585 h290,
+			
+			xbase := ((button_column - 1) * 300)
+			xpos := xbase + 20
+			Gui, Add, Text, x%xpos% y%th1% w20 R2 Center, Virt Btn
+			xpos := xbase + 62
+			Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, Stick ID
+			xpos := xbase + 132
+			Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, Button #
+			xpos := xbase + 205
+			Gui, Add, Text, x%xpos% y%th2% w60 h20 Center, State
+			xpos := xbase + 268
+			Gui, Add, Text, x%xpos% y%th2% w20 h20 Center, QB
+
+			button_row = 1
+		}
+		ypos := 70 + button_row * 30
+		ypos2 := ypos + 5
+		xpos := xbase + 25
+		Gui, Add, Text, x%xpos% y%ypos2% w40 h20 , %A_Index%
+		
+		xpos := xbase + 62
+		ADHD.gui_add("DropDownList", "button_physical_stick_id_" A_Index, "x" xpos " y" ypos " w60 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
+		button_physical_stick_id_%A_Index%_TT := "Select the physical stick for this button"
+		
+		xpos := xbase + 132
+		ADHD.gui_add("DropDownList", "button_id_" A_Index, "x" xpos " y" ypos " w60 h10 R15", "None|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|POV U|POV D|POV L|POV R", "None")
+		button_id_%A_Index%_TT := "Select the button to use from the selected physical stick for this button"
+		
+		xpos := xbase + 220
+		Gui, Add, Text, x%xpos% y%ypos% w30 h20 vbutton_state_%A_Index% cred Center, Off
+		button_row++
+	}
+
+	; HATS TAB
+	; --------
+
+	Gui, Tab, 4
+
+	Gui, Add, Text, x20 y%th1% w50 R2 Center, Hat Number
+	Gui, Add, Text, x75 y%th1% w60 R2 Center, Physical Stick ID
+	;Gui, Add, Text, x135 y%th1% w60 R2 Center, Hat ID
+
+	button_row := 1
+	ypos := 70 + button_row * 30
+	ypos2 := ypos -3
+
+	Loop, % virtual_hats {
+		Gui, Add, Text, x30 y%ypos% w40 h20 , Hat %A_Index%
+		ADHD.gui_add("DropDownList", "hat_physical_stick_id_" A_Index, "x80 y" ypos " w50 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
+
+		Gui, Add, Text, x150 y%th2% w40 Center, Direction
+		Gui, Add, Text, x205 yp Center, State
+		Gui, Add, Text, x248 yp Center, QB
+		
+		Gui, Add, Text, x150 y100 w40 Center, Up
+		Gui, Add, Text, x205 yp w30 h20 vhat_state_1 cred Center, Off
+
+		Gui, Add, Text, x150 y120 w40 Center, Down
+		Gui, Add, Text, x205 yp w30 h20 vhat_state_2 cred Center, Off
+
+		Gui, Add, Text, x150 y140 w40 Center, Left
+		Gui, Add, Text, x205 yp w30 h20 vhat_state_3 cred Center, Off
+
+		Gui, Add, Text, x150 y160 w40 Center, Right
+		Gui, Add, Text, x205 yp w30 h20 vhat_state_4 cred Center, Off
+		
+		button_row++
+	}
+
+	; QUICKBIND RADIOS
+	; ---------------------
+	; AHK cannot group radios if they are interspersed with other controls, so add them all in one go here.
+
+	Gui, Tab, 1
+
+	xpos := 560
+	Loop, %virtual_axes% {
+		ypos := 70 + A_Index * 30
+		ypos2 := ypos + 5
+		tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged hwndQB_A_" A_Index
+		if (A_Index == 1){
+			tmp := tmp " vQuickBindAxes Checked"
+		}
+		Gui, Add, Radio, %tmp%
+	}
+
+	button_tab := 2
+	button_row := 1
+	button_column := 0
+
+	Loop, %virtual_buttons% {
+		if (Mod(A_Index,8) == 1){
+			button_column++
+			if (button_column == 3){
+				button_column := 1
+				button_tab++
+			}
+			Gui, Tab, %button_tab%
+			xbase := ((button_column - 1) * 300)
+			button_row := 1
+		}
+		ypos := 70 + button_row * 30
+		ypos2 := ypos + 5
+		xpos := xbase + 260
+		
+		;tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged"
+		tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged hwndQB_B_" A_Index
+		if (A_Index == 1 || A_Index == 17){
+			tmp := tmp " vQuickBindButtons" button_tab-1 " Checked"
+		}
+		Gui, Add, Radio, %tmp%
+		button_row++
+	}
+
+	Gui, Tab, 4
+
+	Loop, %virtual_hats% {
+		; Create QuickBind menu for U/D/L/R
+		grp := " vQuickBindHats Checked"
+		
+		Gui, Add, Radio, x250 y100 gQuickBindOptionChanged hwndQB_H_1 %grp%
+		Gui, Add, Radio, x250 y120 gQuickBindOptionChanged hwndQB_H_2
+		Gui, Add, Radio, x250 y140 gQuickBindOptionChanged hwndQB_H_3
+		Gui, Add, Radio, x250 y160 gQuickBindOptionChanged hwndQB_H_4
+	}
+
+	; AUTO CONFIGURE
+	; ---------------------
+	Gui, Tab
+
+	Gui, Add, Button, x430 y339 vAutoConfigureButton gAutoConfigurePressed, Auto Configure Stick ID
+	Gui, Add, DropDownList, x560 yp+1 w30 vAutoConfigureID, 1||2|3|4|5|6|7|8
+
+	; QUICKBIND FOOTER
+	; ---------------------
+
+	Gui, Add, GroupBox, x5 y355 w585 h105 vQuickBindLabelGroup, QuickBind
+			
+	Gui, Add, Text, x10 y375 vQuickBindLabelDelay, Delay (seconds)
+	Gui, Add, Edit, xp+100 yp-2 w70 vQuickBindDelay  gQuickBindOptionChanged, 1
+	QuickBindDelay_TT := "The amount of time between you hitting the QuickBind key,`nand QuickBind starting to manipulate the axis or button"
+
+	Gui, Add, Text, x10 y400 vQuickBindLabelDuration, Duration (seconds)
+	Gui, Add, Edit, xp+100 yp-2 w70 vQuickBindDuration  gQuickBindOptionChanged, 1
+	QuickBindDuration_TT := "The amount of time that QuickBind moves the axis or holds the button"
+
+	Gui, Add, Text, x10 y425 vQuickBindLabelAxisType, Axis movement type
+	Gui, Add, DropDownList, xp+100 yp-2 w70 vQuickBindAxisType gQuickBindOptionChanged, High-Low||Mid-High|Mid-Low
+	QuickBindAxisType_TT := "How QuickBind moves the axis.`n`nMid-High just moves up.`nMid-Low just moves down.`nHigh-Low moves to both ends"
+
+	tmp := "QuickBind Instructions:`n"
+	tmp .= "Lets you bind the virtual stick in a game without having to move the physical stick.`n"
+	tmp .= "1) Ensure you have bound 'QuickBind' and 'QuickBind Select' in the Bindings tab.`n"
+	tmp .= "2) Map the physical stick to the virtual stick as required, then enter the game.`n"
+	tmp .= "3) Hit 'QuickBind Select' and move the axis or press the button you wish to bind.`n"
+	tmp .= "4) Hit 'QuickBind', quickly activate the Game's bind function, then wait for the beep`n"
+	tmp .= "    UJR will operate the axis or button, and the game should bind to the virtual stick."
+	Gui, Add, Text, x190 y365 vQuickBindLabelInstructions, %tmp%
+
+	; End GUI creation section
+	; ============================================================================================
+	return
 
 ; ============================================================================================
 ; FUNCTIONS
@@ -980,6 +982,21 @@ auto_configure_buttons(){
 	ADHD.option_changed()
 	return
 }
+
+; Loads the vJoy DLL
+LoadPackagedLibrary() {
+    if (A_PtrSize < 8) {
+        dllpath = VJoyLib\x86\vJoyInterface.dll
+    } else {
+        dllpath = VJoyLib\x64\vJoyInterface.dll
+    }
+    hDLL := DLLCall("LoadLibrary", "Str", dllpath)
+    if (!hDLL) {
+        MsgBox, [%A_ThisFunc%] LoadLibrary %dllpath% fail
+    }
+    return hDLL
+} 
+
 ; ===================================================================================================
 ; FOOTER SECTION
 
