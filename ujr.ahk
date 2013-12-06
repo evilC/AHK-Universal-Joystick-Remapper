@@ -115,7 +115,7 @@ hat_mapping := Array()
 ; The second axis can then use the value in here to merge with the first axis
 merged_axes := Array()
 
-; The "Axes" tab is tab 1
+; The "Axes 1" tab is tab 1
 Gui, Tab, 1
 
 
@@ -128,8 +128,8 @@ w:=gui_width-10
 th1 := 65
 th2 := th1+5
 
-; AXES TAB
-; --------
+; AXES 1 TAB
+; ----------
 
 Gui, Add, Text, x10 y35, vJoy Stick ID
 ADHD.gui_add("DropDownList", "virtual_stick_id", "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
@@ -157,28 +157,28 @@ Loop, %virtual_axes% {
 	;virtual_axis_id_%A_Index%_TT := "Makes this row map to the selected virtual axis"
 	Gui, Add, Text, x30 y%ypos3% Center, %A_Index%
 	
-	ADHD.gui_add("DropDownList", "virtual_axis_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
+	ADHD.gui_add("DropDownList", "axis1_controls_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
 	
-	ADHD.gui_add("DropDownList", "axis_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
-	axis_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
+	ADHD.gui_add("DropDownList", "axis1_controls_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+	axis1_controls_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
 	
-	ADHD.gui_add("DropDownList", "physical_axis_id_" A_Index, "x190 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
-	physical_axis_id_%A_Index%_TT := "Selects which axis to use on the selected physical stick"
+	ADHD.gui_add("DropDownList", "axis1_controls_physical_axis_" A_Index, "x190 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+	axis1_controls_physical_axis_%A_Index%_TT := "Selects which axis to use on the selected physical stick"
 	
-	Gui, Add, Slider, x240 y%ypos% w100 h20 vaxis_state_slider_%A_Index%
-	axis_state_slider_%A_Index%_TT := "Shows the state of this axis"
+	Gui, Add, Slider, x240 y%ypos% w100 h20 vaxis1_controls_state_slider_%A_Index%
+	axis1_controls_state_slider_%A_Index%_TT := "Shows the state of this axis"
 	
-	ADHD.gui_add("CheckBox", "virtual_axis_invert_" A_Index, "x345 y" ypos " w20 h20", "", 0)
-	virtual_axis_invert_%A_Index%_TT := "Inverts this axis"
+	ADHD.gui_add("CheckBox", "axis1_controls_invert_" A_Index, "x345 y" ypos " w20 h20", "", 0)
+	axis1_controls_invert_%A_Index%_TT := "Inverts this axis"
 	
-	ADHD.gui_add("Edit", "virtual_axis_deadzone_" A_Index, "x385 y" ypos " w40 h21", "", 0)
-	virtual_axis_deadzone_%A_Index%_TT := "Applies a deadzone to this axis"
+	ADHD.gui_add("Edit", "axis1_controls_deadzone_" A_Index, "x385 y" ypos " w40 h21", "", 0)
+	axis1_controls_deadzone_%A_Index%_TT := "Applies a deadzone to this axis"
 	
-	ADHD.gui_add("Edit", "virtual_axis_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 100)
-	virtual_axis_sensitivity_%A_Index%_TT := "Adjusts sensitivity of this axis"
+	ADHD.gui_add("Edit", "axis1_controls_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 100)
+	axis1_controls_sensitivity_%A_Index%_TT := "Adjusts sensitivity of this axis"
 	
-	Gui, Add, Text, x490 y%ypos% w40 h21 Center vphysical_value_%A_Index%, 0
-	Gui, Add, Text, x530 y%ypos% w40 h21 Center vvirtual_value_%A_Index%, 0
+	Gui, Add, Text, x490 y%ypos% w40 h21 Center vaxis1_controls_physical_value_%A_Index%, 0
+	Gui, Add, Text, x530 y%ypos% w40 h21 Center vaxis1_controls_virtual_value_%A_Index%, 0
 }
 
 ; BUTTONS TAB
@@ -385,15 +385,15 @@ Loop{
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
 
 				; Display input value, rescale to -100 to +100
-				GuiControl,, physical_value_%index%, % round((val-50)*2,2)
+				GuiControl,, axis1_controls_physical_value_%index%, % round((val-50)*2,2)
 				
 				; Adjust axis according to invert / deadzone options etc
 				val := AdjustAxis(val,value)
 				
 				; Display output value, rescale to -100 to +100
-				GuiControl,, virtual_value_%index%, % round((val-50)*2,2)
+				GuiControl,, axis1_controls_virtual_value_%index%, % round((val-50)*2,2)
 				; Move slider to show input value
-				GuiControl,, axis_state_slider_%index%, % val
+				GuiControl,, axis1_controls_state_slider_%index%, % val
 				
 				; Set the value for this axis on the virtual stick
 				axismap := axis_list_vjoy[value.virt_axis]
@@ -416,9 +416,9 @@ Loop{
 
 			} else {
 				; Blank out unused axes
-				GuiControl,, physical_value_%index%, 
-				GuiControl,, virtual_value_%index%, 
-				GuiControl,, axis_state_slider_%index%, 50
+				GuiControl,, axis1_controls_physical_value_%index%, 
+				GuiControl,, axis1_controls_virtual_value_%index%, 
+				GuiControl,, axis1_controls_state_slider_%index%, 50
 			}
 			
 		}
@@ -643,28 +643,28 @@ option_changed_hook(){
 		;axis_mapping[A_Index].virt_axis := virtual_axis_id_%A_Index%
 		axis_mapping[A_Index].virt_axis := A_Index
 
-		axis_mapping[A_Index].merge := virtual_axis_merge_%A_Index%
+		axis_mapping[A_Index].merge := axis1_controls_merge_%A_Index%
 
-		axis_mapping[A_Index].id := axis_physical_stick_id_%A_Index%
+		axis_mapping[A_Index].id := axis1_controls_physical_stick_id_%A_Index%
 
-		axis_mapping[A_Index].axis := physical_axis_id_%A_Index%
+		axis_mapping[A_Index].axis := axis1_controls_physical_axis_%A_Index%
 		
-		if(virtual_axis_invert_%A_Index% == 0){
+		if(axis1_controls_invert_%A_Index% == 0){
 			axis_mapping[A_Index].invert := 1
 		} else {
 			axis_mapping[A_Index].invert := -1
 		}
 		
-		if (virtual_axis_deadzone_%A_Index% is not number){
-			GuiControl,,virtual_axis_deadzone_%A_Index%,0
+		if (axis1_controls_deadzone_%A_Index% is not number){
+			GuiControl,,axis1_controls_deadzone_%A_Index%,0
 		} else {
-			axis_mapping[A_Index].deadzone := virtual_axis_deadzone_%A_Index%
+			axis_mapping[A_Index].deadzone := axis1_controls_deadzone_%A_Index%
 		}
 		
-		if (virtual_axis_sensitivity_%A_Index% is not number){
-			GuiControl,,virtual_axis_sensitivity_%A_Index%,100
+		if (axis1_controls_sensitivity_%A_Index% is not number){
+			GuiControl,,axis1_controls_sensitivity_%A_Index%,100
 		} else {
-			axis_mapping[A_Index].sensitivity := virtual_axis_sensitivity_%A_Index%
+			axis_mapping[A_Index].sensitivity := axis1_controls_sensitivity_%A_Index%
 		}
 	}
 
@@ -713,7 +713,7 @@ QuickBind:
 		For index, value in axis_mapping {
 			axismap := axis_list_vjoy[value.virt_axis]
 			if (axismap != ""){
-				GuiControl,,axis_state_slider_%index%,50
+				GuiControl,,axis1_controls_state_slider_%index%,50
 				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
 			}
 		}
@@ -742,27 +742,27 @@ QuickBind:
 			play_quickbind_delay()
 			
 			if (QuickBindAxisType == "High-Low"){
-				GuiControl,,axis_state_slider_%QuickBindAxes%,100
+				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,100
 				VJoy_SetAxis(32767, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
-				GuiControl,,axis_state_slider_%QuickBindAxes%,0
+				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,0
 				VJoy_SetAxis(0, vjoy_id, HID_USAGE_%axismap%)
 				;Sleep, % (QuickBindDuration * 1000 ) / 2
 			} else if (QuickBindAxisType == "Mid-High"){
-				GuiControl,,axis_state_slider_%QuickBindAxes%,50
+				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,50
 				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
-				GuiControl,,axis_state_slider_%QuickBindAxes%,100
+				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,100
 				VJoy_SetAxis(32767, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 			} else {
-				GuiControl,,axis_state_slider_%QuickBindAxes%,50
+				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,50
 				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
-				GuiControl,,axis_state_slider_%QuickBindAxes%,0
+				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,0
 				VJoy_SetAxis(0, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 			}
@@ -961,8 +961,8 @@ auto_configure_axes(){
 	Loop, 6 {
 		if (GetKeyState(AutoConfigureID . "Joy" . axis_list_ahk[A_Index]) != ""){
 			;GuiControl, choosestring,virtual_axis_id_%A_Index%, %A_Index%
-			GuiControl, choosestring,axis_physical_stick_id_%A_Index%, %AutoConfigureID%
-			GuiControl, choosestring,physical_axis_id_%A_Index%, %A_Index%
+			GuiControl, choosestring,axis1_controls_physical_stick_id_%A_Index%, %AutoConfigureID%
+			GuiControl, choosestring,axis1_controls_physical_axis_%A_Index%, %A_Index%
 		}
 	}
 	ADHD.option_changed()
