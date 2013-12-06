@@ -688,8 +688,8 @@ option_changed_hook(){
 		tmp := axis_list_vjoy[A_Index]
 
 		; Detect if this axis is present on the virtual stick
-		if (vjoy_ready){
-			axis_mapping[A_Index].exists := VJoy_GetAxisExist_%tmp%(virtual_stick_id)
+		if (vjoy_ready && VJoy_GetAxisExist_%tmp%(virtual_stick_id)){
+			axis_mapping[A_Index].exists := true
 			tmp := "enable"
 		} else {
 			axis_mapping[A_Index].exists := false
