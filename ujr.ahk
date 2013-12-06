@@ -2,21 +2,9 @@
 
 ; ToDo:
 ; =====
-; Remove Axis Merging? Limited use, waste of space.
 ; Replace / Add axis splitting? Move to right of Physical Axis?
 
-; Also remove virtual axis dropdown? Some change of code to check if stick id + axis set. More robust?
-
 ; Make QuickBind settings persistent? Per-Profile?
-
-; Previous / Next QuickBind bindings
-
-; Previous / Next Tab bindings
-
-; Text-to-speech for tab / binding ?
-
-; Auto-map function - specify a stick ID and it configures the profile straight through
-; No undo in ADHD - warn this is destructive!
 
 ; Optimize main loop
 ; Less conversion of scales, ?set all axes at same time?
