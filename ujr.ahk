@@ -594,14 +594,14 @@ tab_changed_hook(){
 	GuiControl, +Hidden, AutoConfigureID
 	GuiControl, +Hidden, AutoConfigureButton
 
-	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
+	if (adhd_current_tab == "Axes 1" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
 		GuiControl, -Hidden, QuickBindLabelGroup
 		GuiControl, -Hidden, QuickBindLabelDelay
 		GuiControl, -Hidden, QuickBindDelay
 		GuiControl, -Hidden, QuickBindLabelDuration
 		GuiControl, -Hidden, QuickBindDuration
 		GuiControl, -Hidden, QuickBindLabelInstructions
-		if (adhd_current_tab == "Axes"){
+		if (adhd_current_tab == "Axes 1"){
 			GuiControl, -Hidden, QuickBindLabelAxisType
 			GuiControl, -Hidden, QuickBindAxisType
 			GuiControl, -Hidden, AutoConfigureButton
@@ -694,7 +694,7 @@ on_exit_hook(){
 ; QuickBind triggered
 QuickBind:
 	; Work out what control we need to manipulate
-	if (adhd_current_tab == "Axes" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
+	if (adhd_current_tab == "Axes 1" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
 		quick_bind_mode := 1
 
 		; set all configured axes to neutral position
@@ -719,7 +719,7 @@ QuickBind:
 		VJoy_SetContPov(-1, vjoy_id, 1)
 
 		; Find which tab we are on and which control is selected, then move it after a delay
-		if (adhd_current_tab == "Axes"){
+		if (adhd_current_tab == "Axes 1"){
 			; Check axis is mapped
 			value := axis_mapping[QuickBindAxes]
 			axismap := axis_list_vjoy[value.virt_axis]
@@ -930,7 +930,7 @@ play_quickbind_delay(){
 }
 
 AutoConfigurePressed:
-	if (adhd_current_tab == "Axes"){
+	if (adhd_current_tab == "Axes 1"){
 		auto_configure_axes()
 	} else {
 		auto_configure_buttons()
