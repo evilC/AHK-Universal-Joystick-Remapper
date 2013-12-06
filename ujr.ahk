@@ -69,7 +69,7 @@ ADHD.config_event("on_exit", "on_exit_hook")
 ;ADHD.config_event("resolution_changed", "resolution_changed_hook")
 
 ; Add custom tabs
-ADHD.tab_list := Array("Axes", "Buttons 1", "Buttons 2", "Hats")
+ADHD.tab_list := Array("Axes 1", "Axes 2", "Buttons 1", "Buttons 2", "Hats")
 
 ; Init ADHD
 ADHD.init()
@@ -182,7 +182,7 @@ Loop, %virtual_axes% {
 ; BUTTONS TAB
 ; -----------
 
-button_tab := 2
+button_tab := 3
 button_row := 1
 button_column := 0
 
@@ -233,7 +233,7 @@ Loop, %virtual_buttons% {
 ; HATS TAB
 ; --------
 
-Gui, Tab, 4
+Gui, Tab, 5
 
 Gui, Add, Text, x20 y%th1% w50 R2 Center, Hat Number
 Gui, Add, Text, x75 y%th1% w60 R2 Center, Physical Stick ID
@@ -283,7 +283,7 @@ Loop, %virtual_axes% {
 	Gui, Add, Radio, %tmp%
 }
 
-button_tab := 2
+button_tab := 3
 button_row := 1
 button_column := 0
 
@@ -311,7 +311,7 @@ Loop, %virtual_buttons% {
 	button_row++
 }
 
-Gui, Tab, 4
+Gui, Tab, 5
 
 Loop, %virtual_hats% {
 	; Create QuickBind menu for U/D/L/R
@@ -848,7 +848,7 @@ quickbind_select(){
 					arr := 1
 					tmp := QuickBindButtons1
 				}
-				tab := 1 + arr
+				tab := 2 + arr
 				GuiControl, Choose,adhd_current_tab, %tab%
 				
 				control, check,,,% "ahk_id " QB_B_%A_Index%%tmp%
@@ -871,7 +871,7 @@ quickbind_select(){
 							continue
 						}
 						; Switch to tab and select QB radio for this button
-						GuiControl, Choose,adhd_current_tab, 4
+						GuiControl, Choose,adhd_current_tab, 5
 						tab_changed_hook()
 						
 						control, check,,,% "ahk_id " QB_H_%A_Index%
