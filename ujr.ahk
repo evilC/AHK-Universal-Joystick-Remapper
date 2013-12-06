@@ -111,7 +111,8 @@ virtual_hats := 1	; AHK currently can only read one hat per stick
 ; The first element is the mapping for the first virtual axis, the second element for axis 2, etc, etc
 ; Each element is then comprise of a further array:
 ; [Physical Joystick #,Physical Axis #, Scale (-1 = invert)]
-axis_mapping := Array()
+axis_mapping1 := Array()
+axis_mapping2 := Array()
 button_mapping := Array()
 hat_mapping := Array()
 
@@ -384,7 +385,7 @@ Loop{
 	
 	if (!quick_bind_mode){
 		; Cycle through rows. MAY NOT BE IN ORDER OF VIRTUAL AXES!
-		For index, value in axis_mapping {
+		For index, value in axis_mapping1 {
 			if (value.exists && vjoy_ready){
 				; Main section for active axes
 				; Get input value
@@ -630,7 +631,8 @@ option_changed_hook(){
 	Global virtual_buttons
 	Global virtual_hats
 	
-	Global axis_mapping
+	Global axis_mapping1
+	Global axis_mapping2
 	Global button_mapping
 	Global hat_mapping
 	
@@ -680,54 +682,65 @@ option_changed_hook(){
 		}
 	}
 
-	axis_mapping := Array()
 	; Build arrays for main loop
-	Loop, %virtual_axes% {
-		axis_mapping[A_Index] := Object()
-		
-		tmp := axis_list_vjoy[A_Index]
+	Loop, 2 {
+		map := A_Index
+		axis_mapping%map% := Array()
+		Loop, %virtual_axes% {
+			axis_mapping%map%[A_Index] := Object()
+			
+			tmp := axis_list_vjoy[A_Index]
 
-		; Detect if this axis is present on the virtual stick
-		if (vjoy_ready && VJoy_GetAxisExist_%tmp%(virtual_stick_id)){
-			axis_mapping[A_Index].exists := true
-			tmp := "enable"
-		} else {
-			axis_mapping[A_Index].exists := false
-			tmp := "disable"
-		}
-		
-		ax := A_Index
-		Loop, 2 {
-			GuiControl, %tmp%, axis%A_Index%_controls_merge_%ax%
-			GuiControl, %tmp%, axis%A_Index%_controls_physical_stick_id_%ax%
-			GuiControl, %tmp%, axis%A_Index%_controls_physical_axis_%ax%
-			GuiControl, %tmp%, axis%A_Index%_controls_invert_%ax%
-			GuiControl, %tmp%, axis%A_Index%_controls_deadzone_%ax%
-			GuiControl, %tmp%, axis%A_Index%_controls_sensitivity_%ax%
-		}
+			; Detect if this axis is present on the virtual stick
+			if (vjoy_ready && VJoy_GetAxisExist_%tmp%(virtual_stick_id)){
+				axis_mapping%map%[A_Index].exists := true
+				tmp := "enable"
+			} else {
+				axis_mapping%map%[A_Index].exists := false
+				tmp := "disable"
+			}
+			
+			/*
+			ax := A_Index
+			Loop, 2 {
+				GuiControl, %tmp%, axis%A_Index%_controls_merge_%ax%
+				GuiControl, %tmp%, axis%A_Index%_controls_physical_stick_id_%ax%
+				GuiControl, %tmp%, axis%A_Index%_controls_physical_axis_%ax%
+				GuiControl, %tmp%, axis%A_Index%_controls_invert_%ax%
+				GuiControl, %tmp%, axis%A_Index%_controls_deadzone_%ax%
+				GuiControl, %tmp%, axis%A_Index%_controls_sensitivity_%ax%
+			}
+			*/
+			GuiControl, %tmp%, axis%map%_controls_merge_%A_Index%
+			GuiControl, %tmp%, axis%map%_controls_physical_stick_id_%A_Index%
+			GuiControl, %tmp%, axis%map%_controls_physical_axis_%A_Index%
+			GuiControl, %tmp%, axis%map%_controls_invert_%A_Index%
+			GuiControl, %tmp%, axis%map%_controls_deadzone_%A_Index%
+			GuiControl, %tmp%, axis%map%_controls_sensitivity_%A_Index%
 
-		axis_mapping[A_Index].merge := axis1_controls_merge_%A_Index%
+			axis_mapping%map%[A_Index].merge := axis%map%_controls_merge_%A_Index%
 
-		axis_mapping[A_Index].id := axis1_controls_physical_stick_id_%A_Index%
+			axis_mapping%map%[A_Index].id := axis%map%_controls_physical_stick_id_%A_Index%
 
-		axis_mapping[A_Index].axis := axis1_controls_physical_axis_%A_Index%
-		
-		if(axis1_controls_invert_%A_Index% == 0){
-			axis_mapping[A_Index].invert := 1
-		} else {
-			axis_mapping[A_Index].invert := -1
-		}
-		
-		if (axis1_controls_deadzone_%A_Index% is not number){
-			GuiControl,,axis1_controls_deadzone_%A_Index%,0
-		} else {
-			axis_mapping[A_Index].deadzone := axis1_controls_deadzone_%A_Index%
-		}
-		
-		if (axis1_controls_sensitivity_%A_Index% is not number){
-			GuiControl,,axis1_controls_sensitivity_%A_Index%,100
-		} else {
-			axis_mapping[A_Index].sensitivity := axis1_controls_sensitivity_%A_Index%
+			axis_mapping%map%[A_Index].axis := axis%map%_controls_physical_axis_%A_Index%
+			
+			if(axis%map%_controls_invert_%A_Index% == 0){
+				axis_mapping%map%[A_Index].invert := 1
+			} else {
+				axis_mapping%map%[A_Index].invert := -1
+			}
+			
+			if (axis%map%_controls_deadzone_%A_Index% is not number){
+				GuiControl,,axis%map%_controls_deadzone_%A_Index%,0
+			} else {
+				axis_mapping%map%[A_Index].deadzone := axis%map%_controls_deadzone_%A_Index%
+			}
+			
+			if (axis%map%_controls_sensitivity_%A_Index% is not number){
+				GuiControl,,axis%map%_controls_sensitivity_%A_Index%,100
+			} else {
+				axis_mapping%map%[A_Index].sensitivity := axis%map%_controls_sensitivity_%A_Index%
+			}
 		}
 	}
 
@@ -810,7 +823,7 @@ QuickBind:
 		quick_bind_mode := 1
 
 		; set all configured axes to neutral position
-		For index, value in axis_mapping {
+		For index, value in axis_mapping1 {
 			axismap := axis_list_vjoy[index]
 			if (axismap != ""){
 				GuiControl,,axis1_controls_state_slider_%index%,50
@@ -833,7 +846,7 @@ QuickBind:
 		; Find which tab we are on and which control is selected, then move it after a delay
 		if (adhd_current_tab == "Axes 1"){
 			; Check axis is mapped
-			axismap := axis_list_vjoy[axis_mapping[QuickBindAxes]]
+			axismap := axis_list_vjoy[axis_mapping1[QuickBindAxes]]
 			if (axismap == ""){
 				return
 			}
@@ -903,7 +916,7 @@ QuickBindSelect:
 
 ; Selects a button / axis for quickbind by detecting what the user presses / moves	
 quickbind_select(){
-	Global axis_mapping
+	Global axis_mapping1
 	Global button_mapping
 	Global hat_mapping
 	Global hat_axes
@@ -918,7 +931,7 @@ quickbind_select(){
 	
 	; Store starting state of axes for later comparison.
 	; If user has a throttle, it may be set at full...
-	For index, value in axis_mapping {
+	For index, value in axis_mapping1 {
 		joystate[index] := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
 		;msgbox % joystate[value.id]
 	}
@@ -997,7 +1010,7 @@ quickbind_select(){
 			}
 		}
 
-		For index, value in axis_mapping {
+		For index, value in axis_mapping1 {
 			if (value.exists){
 				; Main section for active axes
 				; Get input value
