@@ -4,25 +4,27 @@
 ToDo:
 
 Before next release:
-Add INI version to ADHD so we can warn to remove old INI
-ADHD not changing current profile when copying profile? Copy profile, exit, reload and on default
+* Add INI version to ADHD so we can warn to remove old INI
+* ADHD not changing current profile when copying profile? Copy profile, exit, reload and on default
 
 Known Issues:
-Cater for case where non-existant vjoy id is selected on load.
-Should gracefully load and allow user to change ID
+* Cater for case where non-existant vjoy id is selected on load.
+  Should gracefully load and allow user to change ID
+
+* input values for axes sit at 50% until axis moved
 
 Features:
-Allow selection of vjoy id
+* Allow selection of vjoy id
 
-Check presence of features (Hat settings always showing even if virt stick has no hat)
+* Check presence of features (Hat settings always showing even if virt stick has no hat)
 
 Long-term:
-Optimize main loop
-Less conversion of scales, ?set all axes at same time?
+* Optimize main loop
+  Less conversion of scales, ?set all axes at same time?
 
-Replace / Add axis splitting? Move to right of Physical Axis?
+* Replace / Add axis splitting? Move to right of Physical Axis?
 
-Make QuickBind settings persistent? Per-Profile?
+* Make QuickBind settings persistent? Per-Profile?
 */
 
 
@@ -140,8 +142,12 @@ Loop, 2 {
 	tabnum := A_Index
 	Gui, Tab, %tabnum%
 	
-	Gui, Add, Text, x20 y%th1% w30 R2 Center, Virtual Axis
-	Gui, Add, Text, x70 y%th1% w50 R2 Center, Axis Merging
+	Gui, Add, Text, x12 y%th1% w30 R2 Center, Virtual Axis
+	if (A_Index == 1){
+		Gui, Add, Text, x52 y%th1% w70 R2 Center, Special Operations
+	} else {
+		Gui, Add, Text, x70 y%th1% w50 R2 Center, Axis Merging
+	}
 	Gui, Add, Text, x125 y%th1% w60 R2 Center, Physical Stick ID
 	Gui, Add, Text, x185 y%th1% w60 R2 Center, Physical Axis
 	Gui, Add, Text, x240 y%th2% w100 h20 Center, State
@@ -160,9 +166,16 @@ Loop, 2 {
 		ypos3 := ypos + 3
 		Gui, Add, Text, x10 y%ypos3% Center, %A_Index%
 		tmp := axis_list_vjoy[A_Index]
-		Gui, Add, Text, x25 y%ypos3% w35 Center, ( %tmp% )
+		Gui, Add, Text, x15 y%ypos3% w35 Center, ( %tmp% )
 		
-		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_special_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
+		if (tabnum == 1){
+			tmp := "None|Rests H|Rests L|Split H|Split L"
+			axis%tabnum%_controls_special_%A_Index%_TT := "Special Operations:`nRests (Low/High) - Makes Deadzone etc treat the high/low end of the axis as neutral.`nSplit (Low/High) - Uses only the low/high end of the physical axis."
+		} else {
+			tmp := "None|Merge|Greatest"
+			axis%tabnum%_controls_special_%A_Index%_TT := "Enables merging with axis " A_Index " on tab 'Axes 1'.`nMerge - A standard average of the two inputs.`nGreatest - whichever input is deflected the most."
+		}
+		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_special_" A_Index, "x55 y" ypos " w65 h20 R9", tmp, "None")
 		
 		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
 		axis%tabnum%_controls_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
@@ -382,8 +395,12 @@ Loop{
 				; Get input value
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
 				axis2_configured := axis_mapping2[index].id != "None" && axis_mapping2[index].axis != "None"
-				if (axis_mapping2[index].special == "On"){
-					merge := 1
+				if (axis_mapping2[index].special != "None"){
+					if (axis_mapping2[index].special == "Merge"){
+						merge := 1
+					} else {
+						merge := 2
+					}
 				} else {
 					merge := 0
 				}
@@ -392,9 +409,11 @@ Loop{
 				}
 
 				; Display input value, rescale to -100 to +100
-				GuiControl,, axis1_controls_physical_value_%index%, % round((val-50)*2,2)
+				;GuiControl,, axis1_controls_physical_value_%index%, % round((val-50)*2,2)
+				GuiControl,, axis1_controls_physical_value_%index%, % round(val,2)
 				if (axis2_configured){
-					GuiControl,, axis2_controls_physical_value_%index%, % round((val2-50)*2,2)
+					;GuiControl,, axis2_controls_physical_value_%index%, % round((val2-50)*2,2)
+					GuiControl,, axis2_controls_physical_value_%index%, % round(val2,2)
 				}
 				
 				; Adjust axis according to invert / deadzone options etc
@@ -404,9 +423,11 @@ Loop{
 				}
 				
 				; Display output value, rescale to -100 to +100
-				GuiControl,, axis1_controls_virtual_value_%index%, % round((val-50)*2,2)
+				;GuiControl,, axis1_controls_virtual_value_%index%, % round((val-50)*2,2)
+				GuiControl,, axis1_controls_virtual_value_%index%, % round(val,2)
 				if (axis2_configured){
-					GuiControl,, axis2_controls_virtual_value_%index%, % round((val2-50)*2,2)
+					;GuiControl,, axis2_controls_virtual_value_%index%, % round((val2-50)*2,2)
+					GuiControl,, axis2_controls_virtual_value_%index%, % round(val2,2)
 				}
 				; Move slider to show input value
 				GuiControl,, axis1_controls_state_slider_%index%, % val
@@ -422,7 +443,31 @@ Loop{
 				
 				ax := value.axis
 				if (merge){
-					val2 := (val + val2) / 2
+					if (merge == 1){
+						; Standard merge
+						val2 := (val + val2) / 2
+					} else {
+						; "Greatest" merge
+						if (value.invert == -1){
+							; low value is no deflection
+							def1 := val
+						} else {
+							; high value is no deflection
+							def1 := 32767 - val
+						}
+						if (axis_mapping2[index].invert == -1){
+							; low value is no deflection
+							def2 := val2
+						} else {
+							; high value is no deflection
+							def2 := 32767 - val2
+						}
+						if (def1 > def2){
+							val2 := val /2
+						} else {
+							val2 := (32767/2) + (val2 / 2)
+						}
+					}
 					VJoy_SetAxis(val2, vjoy_id, HID_USAGE_%axismap%)
 				} else {
 					VJoy_SetAxis(val, vjoy_id, HID_USAGE_%axismap%)
