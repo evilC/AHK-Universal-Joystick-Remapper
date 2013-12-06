@@ -128,59 +128,62 @@ w:=gui_width-10
 th1 := 65
 th2 := th1+5
 
-; AXES 1 TAB
-; ----------
-
 Gui, Add, Text, x10 y35, vJoy Stick ID
 ADHD.gui_add("DropDownList", "virtual_stick_id", "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
 
-Gui, Add, Text, x20 y%th1% w30 R2 Center, Virtual Axis
-Gui, Add, Text, x70 y%th1% w50 R2 Center, Axis Merging
-Gui, Add, Text, x125 y%th1% w60 R2 Center, Physical Stick ID
-Gui, Add, Text, x185 y%th1% w60 R2 Center, Physical Axis
-Gui, Add, Text, x240 y%th2% w100 h20 Center, State
-Gui, Add, Text, x335 y%th2% w40 h20 Center, Invert
-Gui, Add, Text, x380 y%th2% w50 R2 Center, % "Deadzone %"
-Gui, Add, Text, x435 y%th2% w50 R2 Center, % "Sensitivity %"
-Gui, Add, Text, x485 y%th2% w50 h20 Center, Physical
-Gui, Add, Text, x530 y%th2% w40 h20 Center, Virtual
-Gui, Add, Text, x568 y%th2% w20 h20 Center, QB
+; AXES TABS
+; ---------
 
-tmp := 0
+Loop, 2 {
+	tabnum := A_Index
+	Gui, Tab, %tabnum%
+	
+	Gui, Add, Text, x20 y%th1% w30 R2 Center, Virtual Axis
+	Gui, Add, Text, x70 y%th1% w50 R2 Center, Axis Merging
+	Gui, Add, Text, x125 y%th1% w60 R2 Center, Physical Stick ID
+	Gui, Add, Text, x185 y%th1% w60 R2 Center, Physical Axis
+	Gui, Add, Text, x240 y%th2% w100 h20 Center, State
+	Gui, Add, Text, x335 y%th2% w40 h20 Center, Invert
+	Gui, Add, Text, x380 y%th2% w50 R2 Center, % "Deadzone %"
+	Gui, Add, Text, x435 y%th2% w50 R2 Center, % "Sensitivity %"
+	Gui, Add, Text, x485 y%th2% w50 h20 Center, Physical
+	Gui, Add, Text, x530 y%th2% w40 h20 Center, Virtual
+	Gui, Add, Text, x568 y%th2% w20 h20 Center, QB
 
-Gui, Add, GroupBox, x5 y50 w585 h290,
-Loop, %virtual_axes% {
-	ypos := 70 + A_Index * 30
-	ypos2 := ypos + 5
-	ypos3 := ypos + 3
-	;ADHD.gui_add("DropDownList", "virtual_axis_id_" A_Index, "x10 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
-	;virtual_axis_id_%A_Index%_TT := "Makes this row map to the selected virtual axis"
-	Gui, Add, Text, x30 y%ypos3% Center, %A_Index%
+	Gui, Add, GroupBox, x5 y50 w585 h290,
 	
-	ADHD.gui_add("DropDownList", "axis1_controls_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
-	
-	ADHD.gui_add("DropDownList", "axis1_controls_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
-	axis1_controls_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
-	
-	ADHD.gui_add("DropDownList", "axis1_controls_physical_axis_" A_Index, "x190 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
-	axis1_controls_physical_axis_%A_Index%_TT := "Selects which axis to use on the selected physical stick"
-	
-	Gui, Add, Slider, x240 y%ypos% w100 h20 vaxis1_controls_state_slider_%A_Index%
-	axis1_controls_state_slider_%A_Index%_TT := "Shows the state of this axis"
-	
-	ADHD.gui_add("CheckBox", "axis1_controls_invert_" A_Index, "x345 y" ypos " w20 h20", "", 0)
-	axis1_controls_invert_%A_Index%_TT := "Inverts this axis"
-	
-	ADHD.gui_add("Edit", "axis1_controls_deadzone_" A_Index, "x385 y" ypos " w40 h21", "", 0)
-	axis1_controls_deadzone_%A_Index%_TT := "Applies a deadzone to this axis"
-	
-	ADHD.gui_add("Edit", "axis1_controls_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 100)
-	axis1_controls_sensitivity_%A_Index%_TT := "Adjusts sensitivity of this axis"
-	
-	Gui, Add, Text, x490 y%ypos% w40 h21 Center vaxis1_controls_physical_value_%A_Index%, 0
-	Gui, Add, Text, x530 y%ypos% w40 h21 Center vaxis1_controls_virtual_value_%A_Index%, 0
+	Loop, %virtual_axes% {
+		ypos := 70 + A_Index * 30
+		ypos2 := ypos + 5
+		ypos3 := ypos + 3
+		;ADHD.gui_add("DropDownList", "virtual_axis_id_" A_Index, "x10 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+		;virtual_axis_id_%A_Index%_TT := "Makes this row map to the selected virtual axis"
+		Gui, Add, Text, x30 y%ypos3% Center, %A_Index%
+		
+		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
+		
+		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+		axis%tabnum%_controls_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
+		
+		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_physical_axis_" A_Index, "x190 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+		axis%tabnum%_controls_physical_axis_%A_Index%_TT := "Selects which axis to use on the selected physical stick"
+		
+		Gui, Add, Slider, x240 y%ypos% w100 h20 vaxis%tabnum%_controls_state_slider_%A_Index%
+		axis%tabnum%_controls_state_slider_%A_Index%_TT := "Shows the state of this axis"
+		
+		ADHD.gui_add("CheckBox", "axis" tabnum "_controls_invert_" A_Index, "x345 y" ypos " w20 h20", "", 0)
+		axis%tabnum%_controls_invert_%A_Index%_TT := "Inverts this axis"
+		
+		ADHD.gui_add("Edit", "axis" tabnum "_controls_deadzone_" A_Index, "x385 y" ypos " w40 h21", "", 0)
+		axis%tabnum%_controls_deadzone_%A_Index%_TT := "Applies a deadzone to this axis"
+		
+		ADHD.gui_add("Edit", "axis" tabnum "_controls_sensitivity_" A_Index, "x440 y" ypos " w40 h21", "", 100)
+		axis%tabnum%_controls_sensitivity_%A_Index%_TT := "Adjusts sensitivity of this axis"
+		
+		Gui, Add, Text, x490 y%ypos% w40 h21 Center vaxis%tabnum%_controls_physical_value_%A_Index%, 0
+		Gui, Add, Text, x530 y%ypos% w40 h21 Center vaxis%tabnum%_controls_virtual_value_%A_Index%, 0
+	}
 }
-
 ; BUTTONS TAB
 ; -----------
 
