@@ -152,8 +152,10 @@ Gui, Add, GroupBox, x5 y50 w585 h290,
 Loop, %virtual_axes% {
 	ypos := 70 + A_Index * 30
 	ypos2 := ypos + 5
-	ADHD.gui_add("DropDownList", "virtual_axis_id_" A_Index, "x10 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
-	virtual_axis_id_%A_Index%_TT := "Makes this row map to the selected virtual axis"
+	ypos3 := ypos + 3
+	;ADHD.gui_add("DropDownList", "virtual_axis_id_" A_Index, "x10 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+	;virtual_axis_id_%A_Index%_TT := "Makes this row map to the selected virtual axis"
+	Gui, Add, Text, x30 y%ypos3% Center, %A_Index%
 	
 	ADHD.gui_add("DropDownList", "virtual_axis_merge_" A_Index, "x70 y" ypos " w50 h20 R9", "None||On", "None")
 	
@@ -376,7 +378,8 @@ Loop{
 		; Cycle through rows. MAY NOT BE IN ORDER OF VIRTUAL AXES!
 		For index, value in axis_mapping {
 			;if (virtual_axis_id_%index% != "None" && axis_mapping[index].id != "None" && axis_mapping[index].axis != "None"){
-			if (virtual_axis_id_%index% != "None"){
+			;if (virtual_axis_id_%index% != "None"){
+			if (value.exists){
 				; Main section for active axes
 				; Get input value
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
@@ -635,9 +638,10 @@ option_changed_hook(){
 		tmp := axis_list_vjoy[A_Index]
 
 		; Detect if this axis is present on the virtual stick
-		axis_mapping[A_Index].exist := VJoy_GetAxisExist_%tmp%(virtual_stick_id)
+		axis_mapping[A_Index].exists := VJoy_GetAxisExist_%tmp%(virtual_stick_id)
 		
-		axis_mapping[A_Index].virt_axis := virtual_axis_id_%A_Index%
+		;axis_mapping[A_Index].virt_axis := virtual_axis_id_%A_Index%
+		axis_mapping[A_Index].virt_axis := A_Index
 
 		axis_mapping[A_Index].merge := virtual_axis_merge_%A_Index%
 
@@ -895,7 +899,8 @@ quickbind_select(){
 		}
 
 		For index, value in axis_mapping {
-			if (virtual_axis_id_%index% != "None"){
+			;if (virtual_axis_id_%index% != "None"){
+			if (value.exists){
 				; Main section for active axes
 				; Get input value
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
@@ -955,7 +960,7 @@ auto_configure_axes(){
 	; AHK only supports 6 axes per stick, so just populate lines 1-6
 	Loop, 6 {
 		if (GetKeyState(AutoConfigureID . "Joy" . axis_list_ahk[A_Index]) != ""){
-			GuiControl, choosestring,virtual_axis_id_%A_Index%, %A_Index%
+			;GuiControl, choosestring,virtual_axis_id_%A_Index%, %A_Index%
 			GuiControl, choosestring,axis_physical_stick_id_%A_Index%, %AutoConfigureID%
 			GuiControl, choosestring,physical_axis_id_%A_Index%, %A_Index%
 		}
