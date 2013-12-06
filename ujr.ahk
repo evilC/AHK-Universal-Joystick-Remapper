@@ -132,7 +132,7 @@ th2 := th1+5
 ; --------
 
 Gui, Add, Text, x10 y35, vJoy Stick ID
-ADHD.gui_add("DropDownList", "virtual_stick_id" A_Index, "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
+ADHD.gui_add("DropDownList", "virtual_stick_id", "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
 
 Gui, Add, Text, x20 y%th1% w30 R2 Center, Virtual Axis
 Gui, Add, Text, x70 y%th1% w50 R2 Center, Axis Merging
@@ -625,9 +625,17 @@ option_changed_hook(){
 	Global button_mapping
 	Global hat_mapping
 	
+	Global axis_list_vjoy
+	Global virtual_stick_id
+	
 	; Build arrays for main loop
 	Loop, %virtual_axes% {
 		axis_mapping[A_Index] := Object()
+		
+		tmp := axis_list_vjoy[A_Index]
+
+		; Detect if this axis is present on the virtual stick
+		axis_mapping[A_Index].exist := VJoy_GetAxisExist_%tmp%(virtual_stick_id)
 		
 		axis_mapping[A_Index].virt_axis := virtual_axis_id_%A_Index%
 
