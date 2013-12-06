@@ -404,6 +404,14 @@ VJoy_RelinquishVJD(id) {
     return VJDev[id].Relinquish()
 }
  
+; Acquire device - added by evilC
+VJoy_AcquireVJD(id) {
+    Global VJDev
+    if (VJoy_DeviceErr(id))
+        return False
+	return DllCall("vJoyInterface\AcquireVJD", "UInt", id)
+}
+ 
 ; destructor
 VJoy_Close() {
     Global VJDev

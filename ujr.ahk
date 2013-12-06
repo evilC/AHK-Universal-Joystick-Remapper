@@ -90,12 +90,17 @@ ADHD.create_gui()
 
 LoadPackagedLibrary()
 
+vjoy_id := 0
+vjoy_ready := 0
+
+/*
 vjoy_id := 1
 VJoy_Init(vjoy_id)
 if (!VJoy_Ready(vjoy_id)){
 	msgbox The vJoy virtual joystick is already being controlled by something else.`n`nExiting...
 	ExitApp
 }
+*/
 
 ; Init stick vars for AHK
 axis_list_ahk := Array("X","Y","Z","R","U","V")
@@ -394,7 +399,7 @@ Loop{
 		For index, value in axis_mapping {
 			;if (virtual_axis_id_%index% != "None" && axis_mapping[index].id != "None" && axis_mapping[index].axis != "None"){
 			;if (virtual_axis_id_%index% != "None"){
-			if (value.exists){
+			if (value.exists && vjoy_ready){
 				; Main section for active axes
 				; Get input value
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
@@ -439,7 +444,7 @@ Loop{
 		}
 		
 		For index, value in button_mapping {
-			if (button_mapping[index].id != "None" && button_mapping[index].button != "None"){
+			if (button_mapping[index].id != "None" && button_mapping[index].button != "None" && vjoy_ready){
 				if (value.pov){
 					; get current state of pov in val
 					val := PovToAngle(GetKeyState(value.id . "Joy" . "POV"))
@@ -455,7 +460,7 @@ Loop{
 		}
 		
 		For index, value in hat_mapping {
-			if (hat_mapping[index].id != "None"){
+			if (hat_mapping[index].id != "None" && vjoy_ready){
 				val := GetKeyState(value.id . "Joy" . "POV")
 				Loop, 4 {
 					if (PovMatchesAngle(PovToAngle(val), hat_axes[A_Index])){
@@ -646,6 +651,58 @@ option_changed_hook(){
 	Global axis_list_vjoy
 	Global virtual_stick_id
 	
+	Global vjoy_id
+	Global vjoy_ready
+
+	/*
+    VJD_STAT_OWN := 0   ; The  vJoy Device is owned by this application.
+    VJD_STAT_FREE := 1  ; The  vJoy Device is NOT owned by any application (including this one).
+    VJD_STAT_BUSY := 2  ; The  vJoy Device is owned by another application. It cannot be acquired by this application.
+    VJD_STAT_MISS := 3  ; The  vJoy Device is missing. It either does not exist or the driver is down.
+    VJD_STAT_UNKN := 4  ; Unknown
+	*/
+ 
+	; Connect to virtual stick
+	if (vjoy_id != virtual_stick_id){
+		if (VJoy_Ready(vjoy_id)){
+			VJoy_RelinquishVJD(vjoy_id)
+			;msgbox % DllCall("vJoyInterface\GetVJDStatus", "UInt", vjoy_id)
+			VJoy_Close()
+		}
+		vjoy_id := virtual_stick_id
+		vjoy_status := DllCall("vJoyInterface\GetVJDStatus", "UInt", vjoy_id)
+		if (vjoy_status == 2){
+			; 2 = busy
+			;return
+		}  else if (vjoy_status >= 3){
+			;return
+			; 3-4 not available
+		} else if (vjoy_status == 0){
+			;return
+			; already owned by this app - should not come here as we want to release non used sticks
+		}
+		;msgbox % DllCall("vJoyInterface\GetVJDStatus", "UInt", vjoy_id)
+		if (vjoy_status <= 1){
+			VJoy_Init(vjoy_id)
+			
+			; Seem to need this to allow reconnecting to sticks (ie you selected id 1 then 2 then 1 again. Else control of stick does not resume
+			VJoy_AcquireVJD(vjoy_id)
+			;DllCall("vJoyInterface\SetVJDStatus", "UInt", 0)
+			VJoy_ResetVJD(vjoy_id)
+			if (VJoy_Ready(vjoy_id)){
+				vjoy_ready := 1
+			} else {
+				msgbox There was a problem connecting to the virtual stick :(
+				vjoy_ready := 0
+				;return
+				;ExitApp
+			}
+		} else {
+			vjoy_ready := 0
+		}
+	}
+
+	axis_mapping := Array()
 	; Build arrays for main loop
 	Loop, %virtual_axes% {
 		axis_mapping[A_Index] := Object()
@@ -653,7 +710,11 @@ option_changed_hook(){
 		tmp := axis_list_vjoy[A_Index]
 
 		; Detect if this axis is present on the virtual stick
-		axis_mapping[A_Index].exists := VJoy_GetAxisExist_%tmp%(virtual_stick_id)
+		if (!VJoy_Ready(vjoy_id)){
+			axis_mapping[A_Index].exists := false
+		} else {
+			axis_mapping[A_Index].exists := VJoy_GetAxisExist_%tmp%(virtual_stick_id)
+		}
 		
 		; Enable / Disable controls
 		if (axis_mapping[A_Index].exists){
@@ -698,6 +759,7 @@ option_changed_hook(){
 		}
 	}
 
+	button_mapping := Array()
 	Loop, %virtual_buttons% {
 		button_mapping[A_Index] := Object()
 		
@@ -714,6 +776,7 @@ option_changed_hook(){
 		button_mapping[A_Index].button := button_id_%A_Index%
 	}
 	
+	hat_mapping := Array()
 	Loop, %virtual_hats% {
 		hat_mapping[A_Index] := Object()
 		
