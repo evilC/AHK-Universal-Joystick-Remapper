@@ -1,20 +1,30 @@
 ; UJR - Universal Joystick Remapper
 
-; ToDo:
-; =====
-; Allow selection of vjoy id
+/*
+ToDo:
 
-; Cater for case where non-existant vjoy id is selected on load.
-; Should gracefully load and allow user to change ID
+Before next release:
+Add INI version to ADHD so we can warn to remove old INI
 
-; Check presence of features (Hat settings always showing even if virt stick has no hat)
 
-; Replace / Add axis splitting? Move to right of Physical Axis?
+Known Issues:
+Cater for case where non-existant vjoy id is selected on load.
+Should gracefully load and allow user to change ID
 
-; Make QuickBind settings persistent? Per-Profile?
+Features:
+Allow selection of vjoy id
 
-; Optimize main loop
-; Less conversion of scales, ?set all axes at same time?
+Check presence of features (Hat settings always showing even if virt stick has no hat)
+
+Long-term:
+Optimize main loop
+Less conversion of scales, ?set all axes at same time?
+
+Replace / Add axis splitting? Move to right of Physical Axis?
+
+Make QuickBind settings persistent? Per-Profile?
+*/
+
 
 #SingleInstance On
 
