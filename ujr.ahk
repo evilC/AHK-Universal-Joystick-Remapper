@@ -11,8 +11,6 @@ Known Issues:
 * Cater for case where non-existant vjoy id is selected on load.
   Should gracefully load and allow user to change ID
 
-* input values for axes sit at 50% until axis moved
-
 Features:
 * Allow selection of vjoy id
 
@@ -49,7 +47,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "5.4", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "6.0", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ;ADHD.config_default_app("CryENGINE")
@@ -417,9 +415,24 @@ Loop{
 				}
 				
 				; Adjust axis according to invert / deadzone options etc
-				val := AdjustAxis(val,value)
+				if (value.special == "None"){
+					rests := 0
+				} else {
+					tmp := instr(value.special, "Rests ")
+					if (tmp){
+						tmp := substr(value.special, 7)
+						if (tmp == "H"){
+							rests := 1
+						} else {
+							rests := -1
+						}
+					}
+				}
+				val := AdjustAxis(val,value,rests)
 				if (axis2_configured){
-					val2 := AdjustAxis(val2,axis_mapping2[index])
+					; Pass opposite of rests to second (merged) axis
+					rests := rests * -1
+					val2 := AdjustAxis(val2,axis_mapping2[index],rests)
 				}
 				
 				; Display output value, rescale to -100 to +100
@@ -520,33 +533,72 @@ return
 ; FUNCTIONS
 
 ; Make adjustments to axis based upon settings
-AdjustAxis(input,settings){
-	; Shift from 0 -> 100 scale to -50 -> +50 scale
-	output := input - 50
-	
-	; invert if needed
-	output := output * settings.invert
-	
-	; impose deadzone if set
-	dz := settings.deadzone
-	
-	if (abs(output) <= settings.deadzone/2){
-		output := 0
+AdjustAxis(input,settings,rests){
+	if (rests == 0){
+		; Scale rests in middle
+		
+		; Shift from 0 -> 100 scale to -50 -> +50 scale
+		output := input - 50
+		
+		; invert if needed
+		output := output * settings.invert
+		
+		; impose deadzone if set
+		if (abs(output) <= settings.deadzone/2){
+			output := 0
+		} else {
+			output := sign(output)*50*(abs(output)-(settings.deadzone/2))/(50-settings.deadzone/2)
+		}
+		
+		; Adjust for sensitivity
+		if (settings.sensitivity != 100){
+			sens := settings.sensitivity/100 ; Shift sensitivity to 0 -> 1 scale
+			output := output/50	; Shift input value to -1 -> +1 scale
+			output := (sens*output)+((1-sens)*output**3)	; Perform sensitivity calc
+			output := output*50	; Shift back to -50 -> 50 scale
+		}
+		
+		; Shift back to proper scale
+		output := output + 50
 	} else {
-		output := sign(output)*50*(abs(output)-(settings.deadzone/2))/(50-settings.deadzone/2)
-	}
-	
-	; Adjust for sensitivity
-	if (settings.sensitivity != 100){
-		sens := settings.sensitivity/100 ; Shift sensitivity to 0 -> 1 scale
-		output := output/50	; Shift input value to -1 -> +1 scale
-		output := (sens*output)+((1-sens)*output**3)	; Perform sensitivity calc
-		output := output*50	; Shift back to -50 -> 50 scale
+		; Scale rests at one end
+		output := input
+		
+		; invert if needed
+		if (settings.invert == -1){
+			output := 100 - output
+		}
 
+		; invert according to rests, so we are always operating on a low->high scale
+		if (rests == 1){
+			; rests high - invert before applying deadzone
+			output := 100 - output
+		}
+			
+		; impose deadzone if set
+		if (settings.deadzone != 0){
+			if (output < settings.deadzone){
+				output := 0
+			} else {
+				;rescale
+				output := (output - settings.deadzone) * (100 / (100 - settings.deadzone))
+			}
+		}
+		
+		; Adjust for sensitivity
+		if (settings.sensitivity != 100){
+			sens := settings.sensitivity/100 ; Shift sensitivity to 0 -> 1 scale
+			output := output/100	; Shift input value to -1 -> +1 scale
+			output := (sens*output)+((1-sens)*output**3)	; Perform sensitivity calc
+			output := output*100	; Shift back to -50 -> 50 scale
+		}
+
+		if (rests == 1){
+			; rests high - de-invert after applying deadzone and sensitivity
+			output := 100 - output
+		}
+		
 	}
-	
-	; Shift back to proper scale
-	output := output + 50
 	
 	return output
 }
