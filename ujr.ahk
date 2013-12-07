@@ -5,22 +5,16 @@ ToDo:
 
 Before next release:
 * Add INI version to ADHD so we can warn to remove old INI
+
 * ADHD not changing current profile when copying profile? Copy profile, exit, reload and on default
 
+* Finish axis splitting
+
 Known Issues:
-* Cater for case where non-existant vjoy id is selected on load.
-  Should gracefully load and allow user to change ID
 
 Features:
-* Allow selection of vjoy id
-
-* Check presence of features (Hat settings always showing even if virt stick has no hat)
 
 Long-term:
-* Optimize main loop
-  Less conversion of scales, ?set all axes at same time?
-
-* Replace / Add axis splitting? Move to right of Physical Axis?
 
 * Make QuickBind settings persistent? Per-Profile?
 */
