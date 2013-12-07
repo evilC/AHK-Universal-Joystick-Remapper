@@ -8,8 +8,6 @@ Before next release:
 
 * ADHD not changing current profile when copying profile? Copy profile, exit, reload and on default
 
-* Finish axis splitting
-
 Known Issues:
 
 Features:
@@ -18,7 +16,6 @@ Long-term:
 
 * Make QuickBind settings persistent? Per-Profile?
 */
-
 
 #SingleInstance Off
 
@@ -394,6 +391,7 @@ Loop{
 				; Main section for active axes
 				; Get input value
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
+				
 				axis2_configured := axis_mapping2[index].id != "None" && axis_mapping2[index].axis != "None"
 				if (axis_mapping2[index].special != "None"){
 					if (axis_mapping2[index].special == "Merge"){
@@ -427,6 +425,16 @@ Loop{
 							rests := 1
 						} else {
 							rests := -1
+						}
+					} else {
+						tmp := instr(value.special, "Split ")
+						if (tmp){
+							tmp := substr(value.special, 7)
+							if (tmp == "H"){
+								rests := 1
+							} else {
+								rests := -1
+							}
 						}
 					}
 				}
@@ -563,8 +571,26 @@ AdjustAxis(input,settings,rests){
 		; Shift back to proper scale
 		output := output + 50
 	} else {
+		if (settings.special == "None"){
+			output := input
+		} else {
+			if (settings.special == "Split H"){
+				; rests low: 50-100 -> 0-100
+				if (input < 50){
+					output := 0
+				} else {
+					output := (input - 50) * 2
+				}
+			} else {
+				; rests high: 50-0 -> 0-100
+				if (input > 50){
+					output := 0
+				} else {
+					output := (50 - input) * 2
+				}
+			}
+		}
 		; Scale rests at one end
-		output := input
 		
 		; invert if needed
 		if (settings.invert == -1){
