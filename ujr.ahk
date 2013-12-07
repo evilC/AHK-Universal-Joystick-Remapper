@@ -323,7 +323,7 @@ Loop, %virtual_buttons% {
 	;tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged"
 	tmp := "x" xpos " y" ypos " w25 Right gQuickBindOptionChanged hwndQB_B_" A_Index
 	if (A_Index == 1 || A_Index == 17){
-		tmp := tmp " vQuickBindButtons" button_tab-1 " Checked"
+		tmp := tmp " vQuickBindButtons" button_tab-2 " Checked"
 	}
 	Gui, Add, Radio, %tmp%
 	button_row++
@@ -926,8 +926,7 @@ QuickBind:
 		; set all configured axes to neutral position
 		For index, value in axis_mapping1 {
 			axismap := axis_list_vjoy[index]
-			;if (axismap != ""){
-			if (value.exists){
+			if (VJoy_GetAxisExist_%axismap%(vjoy_id)){
 				GuiControl,,axis1_controls_state_slider_%index%,50
 				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
 			}
@@ -935,26 +934,25 @@ QuickBind:
 		
 		; Set all configured buttons to off
 		Loop, % virtual_buttons {
-			SetButtonState(A_Index,0)
-			VJoy_SetBtn(0, vjoy_id, A_Index)
+			if (VJoy_GetVJDButtonNumber(vjoy_id) >= A_Index){
+				SetButtonState(A_Index,0)
+				VJoy_SetBtn(0, vjoy_id, A_Index)
+			}
 		}
 		
 		; Set all configured hats to neutral position
 		Loop, 4 {
-			SetHatState(A_Index,0)
+			if (VJoy_GetContPovNumber(vjoy_id) >= A_Index){
+				SetHatState(A_Index,0)
+			}
 		}
 		VJoy_SetContPov(-1, vjoy_id, 1)
 
 		; Find which tab we are on and which control is selected, then move it after a delay
 		if (adhd_current_tab == "Axes 1"){
-			; Check axis is mapped
-			axismap := axis_list_vjoy[axis_mapping1[QuickBindAxes]]
-			if (axismap == ""){
-				return
-			}
-			
 			play_quickbind_delay()
 			
+			axismap := axis_list_vjoy[QuickBindAxes]
 			if (QuickBindAxisType == "High-Low"){
 				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,100
 				VJoy_SetAxis(32767, vjoy_id, HID_USAGE_%axismap%)
@@ -1123,7 +1121,7 @@ quickbind_select(){
 					GuiControl, Choose,adhd_current_tab, 1
 					
 					ax := value.axis
-					control, check,,,% "ahk_id " QB_A_%ax%
+					control, check,,,% "ahk_id " QB_A_%A_Index%
 					Gui, Submit, NoHide
 					
 					tab_changed_hook()
