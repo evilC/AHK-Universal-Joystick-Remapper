@@ -82,12 +82,19 @@ Advanced
 Source code:
 The ujr.ahk file in the zip is the source code. In order to use this, you will also need my ADHD library.
 
+"Rest" settings:
+On the Axis 1 tab in the "Special Operations" column, the "Rest H/L" settings do the following:
+Rest H - Tells UJR that this axis Rests at a high value (ie a pedal that sits at max value when the pedal is not pressed)
+Rest L - Tells UJR that this axis Rests at a low value (ie a pedal that sits at min value when the pedal is not pressed)
+Setting these will affect how the deadzone / sensitivity settings are applied.
+
 Axis Merging:
 Use this to merge two axes on to one, for example to merge two pedals into one rudder.
 It is NOT recommended for input axes that rest in a neutral position, it is intended for axes that rest at one end (eg pedals).
 The Axes 2 tab is for configuring the second axis to merge.
 For example, if your left pedal is stick 1, axis 1 and your right pedal is stick 1, axis 2
 On the "Axes 1" tab, you would set row 1 to stick 1, axis 1 and make sure that pressing the pedal moves the slider left (use invert if needed)
+On the "Axes 1" tab, set the "Special Operations" option for row 1 to "Rest H" to let UJR know to apply the deadzone and sensitivity settings.
 On the "Axes 2" tab, you would set row 1 to stick 1, axis 2 and make sure that pressing the pedal moves the slider left (use invert if needed)
 On the "Axes 2" tab, set "Axis Merging" to either "Merge" or "Greatest"
 "Merge" averages the two pedals.
@@ -100,12 +107,6 @@ Use this to use half of a physical axis to control a virtual axis.
 The two settings - "Low" and "High" select which end of the axis is used for the virtual axis
 Bear in mind that this is intended to be used for axes that normally sit in the middle of the axis (like a stick),
 not axes that normally sit at one end of the scale (like pedals)
-
-"Rest" settings:
-On the Axis 1 tab in the "Special Operations" column, the "Rest H/L" settings do the following:
-Rest H - Tells UJR that this axis Rests at a high value (ie a pedal that sits at max value when the pedal is not pressed)
-Rest L - Tells UJR that this axis Rests at a low value (ie a pedal that sits at min value when the pedal is not pressed)
-Setting these will affect how the deadzone / sensitivity settings are applied.
 
 General notes:
 UJR currently does not mask the Physical Joystick from games etc - it will still see both.
