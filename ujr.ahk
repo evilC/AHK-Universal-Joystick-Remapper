@@ -4,7 +4,6 @@
 ToDo:
 
 Before next release:
-* Add instructions to quickbind area for axes2 tab
 
 Known Issues:
 
@@ -371,6 +370,15 @@ tmp .= "3) Hit 'QuickBind Select' and move the axis or press the button you wish
 tmp .= "4) Hit 'QuickBind', quickly activate the Game's bind function, then wait for the beep`n"
 tmp .= "    UJR will operate the axis or button, and the game should bind to the virtual stick."
 Gui, Add, Text, x190 y365 vQuickBindLabelInstructions, %tmp%
+
+tmp := "Axis Merging Instructions:`n`n"
+tmp .= "This tab is used to configure Axis Merging - a feature that allows you to merge two physical axes into one virtual axis`n"
+tmp .= "Each row on this tab corresponds to a row on the Axes 1 tab. Row 1 on this tab will be merged with row 1 on the Axes 1 tab.`n"
+tmp .= "Intended for use with axes that sit at one end when resting - for example to merge two pedal axes into one rudder axis.`n"
+tmp .= "On the 'Axes 1' tab: Configure the left pedal to move the slider left (use 'Invert' if needed), and set 'Special Ops' to 'Rest H'.`n"
+tmp .= "On the 'Axes 2' tab: Configure the right pedal to move the slider right, and set 'Axis Merging' to 'Merge' or 'Greatest' .`n"
+tmp .= "Merge averages the two axes, Greatest uses whichever axis is pressed the most."
+Gui, Add, Text, x10 y345 vAxisMergingInstructions, %tmp%
 
 ; End GUI creation section
 ; ============================================================================================
@@ -742,6 +750,7 @@ tab_changed_hook(){
 	GuiControl, +Hidden, QuickBindLabelInstructions
 	GuiControl, +Hidden, AutoConfigureID
 	GuiControl, +Hidden, AutoConfigureButton
+	GuiControl, +Hidden, AxisMergingInstructions
 
 	if (adhd_current_tab == "Axes 1" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
 		GuiControl, -Hidden, QuickBindLabelGroup
@@ -761,6 +770,8 @@ tab_changed_hook(){
 		} else if (adhd_current_tab == "Hats"){
 		
 		}
+	} else if (adhd_current_tab == "Axes 2"){
+		GuiControl, -Hidden, AxisMergingInstructions
 	}
 }
 
