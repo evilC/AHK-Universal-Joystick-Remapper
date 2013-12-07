@@ -4,9 +4,7 @@
 ToDo:
 
 Before next release:
-* Add INI version to ADHD so we can warn to remove old INI
-
-* ADHD not changing current profile when copying profile? Copy profile, exit, reload and on default
+* Add instructions to quickbind area for axes2 tab
 
 Known Issues:
 
@@ -49,6 +47,10 @@ ADHD.config_size(600,500)
 ; Configure update notifications:
 ADHD.config_updates("http://evilc.com/files/ahk/vjoy/ujr.au.txt")
 
+; Warn user of incompatible settings file
+ini_version := 2
+ADHD.config_ini_version(ini_version)
+
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
@@ -74,6 +76,11 @@ ADHD.tab_list := Array("Axes 1", "Axes 2", "Buttons 1", "Buttons 2", "Hats")
 
 ; Init ADHD
 ADHD.init()
+if (!ADHD.first_run && ADHD.loaded_ini_version != ini_version){
+	msgbox This version of UJR is incompatible with your settings file.`nPlease delete or rename ujr.ini and re-launch UJR.`n`nExiting...
+	ADHD.write_version := 0
+	ExitApp
+}
 ADHD.create_gui()
 
 ; Init the PPJoy / vJoy library

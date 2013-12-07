@@ -33,9 +33,9 @@ Stage 1 - Initial setup
 2) Go into the Bindings tab and bind something to QuickBind. In this example I sall assume you used F2
    eg to bind to F2: Tick "Program Mode", click the mouse in the box on the "QuickBind" row in the "Keyboard" column, then Hit F2
    IMPORTANT!! When done changing bindings, ALWAYS be sure to untick "Program Mode"
-3) Go to the "Axes" tab.
+3) Go to the "Axes 1" tab.
    There are 8 rows in this tab, each representing an axis on the virtual controller.
-   On the first row, set "Virtual Axis" to 1, set "Phystical Stick ID" to 1 and "Physical Axis" to 1.
+   On the first row (X), set "Physical Stick ID" to 1 and "Physical Axis" to 1.
    Now move axis 1 on your stick.
    If the "State" slider does not move, change the "Physical Stick ID" dropdown to the next option and try again
    ie if 1 does not work, try 2, then 3 etc...
@@ -79,19 +79,35 @@ The Delay option for QuickBind will let you adjust how long it waits before mani
 Advanced
 --------
 
-Source code - The ujr.ahk file in the zip is the source code. In order to use this, you will also need my ADHD library.
+Source code:
+The ujr.ahk file in the zip is the source code. In order to use this, you will also need my ADHD library.
 
-Axis Merging - Use this to merge two axes on to one, for example to merge two pedals into one rudder.
+Axis Merging:
+Use this to merge two axes on to one, for example to merge two pedals into one rudder.
 It is NOT recommended for input axes that rest in a neutral position, it is intended for axes that rest at one end (eg pedals).
-To use, start off by setting up your two input axes separately such that each moves the slider in a different direction.
-For example, have your left pedal on virtual axis 1, and set it up so that the idle position is all the way right and fully pressed is all the way left.
-Then set up the right pedal on virtual axis 2, and have it move the slider left.
-Once that works, set both input axes to the same virtual axis, and turn Axis Merging on for both axes.
-DO NOT enable deadzone for any merged row
+The Axes 2 tab is for configuring the second axis to merge.
+For example, if your left pedal is stick 1, axis 1 and your right pedal is stick 1, axis 2
+On the "Axes 1" tab, you would set row 1 to stick 1, axis 1 and make sure that pressing the pedal moves the slider left (use invert if needed)
+On the "Axes 2" tab, you would set row 1 to stick 1, axis 2 and make sure that pressing the pedal moves the slider left (use invert if needed)
+On the "Axes 2" tab, set "Axis Merging" to either "Merge" or "Greatest"
+"Merge" averages the two pedals.
+"Greatest" uses whichever pedal is pressed the most.
 Bear in mind this is intended for merging axes that normally sit at one end of the scale (like a pedal) rather than in the middle (like a stick)
 Merging two sticks will have strange results.
 
+Axis Splitting:
+Use this to use half of a physical axis to control a virtual axis.
+The two settings - "Low" and "High" select which end of the axis is used for the virtual axis
+Bear in mind that this is intended to be used for axes that normally sit in the middle of the axis (like a stick),
+not axes that normally sit at one end of the scale (like pedals)
 
+"Rest" settings:
+On the Axis 1 tab in the "Special Operations" column, the "Rest H/L" settings do the following:
+Rest H - Tells UJR that this axis Rests at a high value (ie a pedal that sits at max value when the pedal is not pressed)
+Rest L - Tells UJR that this axis Rests at a low value (ie a pedal that sits at min value when the pedal is not pressed)
+Setting these will affect how the deadzone / sensitivity settings are applied.
+
+General notes:
 UJR currently does not mask the Physical Joystick from games etc - it will still see both.
 As long as the physical joystick is not bound to anything, it shouldn't make a difference.
 If you need to bind the virtual axis but cannot because the game bind routine recognises the physical stick instead,

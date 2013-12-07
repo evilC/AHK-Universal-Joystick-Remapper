@@ -6,6 +6,22 @@ Key:
 = : Change / Fix
 + : Added feature
 
+6.0 7th Dec 2013
+! Profiles from previous versions of UJR are not compatible with this version
+  Please delete or re-name uhr.ini
+! VJoy library was updated - be sure to copy the contents of VJoyLib folder over old copy!
+= Changed Axis Merging mechanism
+  Should be simpler to understand now
++ Can now control different virtual sticks and swap virtual stick on the fly
++ Can now run multiple copies of UJR simultaneously.
+  Each copy of UJR can control a different virtual stick.
++ Axis Splitting
+  Can use half a physical axis to control a virtual axis
++ Improved Deadzone / Sensitivity support
+  Per-axis dz / sens support when doing axis merging
+  Rest H/L mode for applying dz / sens to one end of an axis (For throttle / pedal like axes)
+= Fixed bug with Copying profiles (Exiting and reloading would not result in copied profile being the current one)
+
 5.4 30th Nov 2013
 = Modification to VJoy library - it can now correctly control virtual stick IDs other than 1.
   No actual changes to UJR, but it would now be easy to make UJR control any virtual stick ID (Currently thru a code edit).
