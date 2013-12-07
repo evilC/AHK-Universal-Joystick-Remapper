@@ -50,6 +50,10 @@ Congratulations, your stick is now configured!
 Open the joystick control panel (Start -> joy.cpl) and double click the "vJoy Device" entry.
 You should see the virtual stick mimicking the actions of your physical stick.
 
+If rows appear greyed out, that is because the virtual joystick is not configured to support that function.
+For example, if you only configured the virtual joystick to be 16 buttons, buttons 17-32 will be greyed out.
+To configure the virtual stick, use the configuration utility that came with vJoy.
+
 The profiles menu can be used to create additional profiles - this allows you quickly change the configuration of UJR.
 
 Also bear in mind that the virtual joystick is always "plugged in". Always mapping games to the virtual stick gives you a nice benefit:
