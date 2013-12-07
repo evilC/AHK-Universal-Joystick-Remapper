@@ -1017,6 +1017,7 @@ QuickBindSelect:
 ; Selects a button / axis for quickbind by detecting what the user presses / moves	
 quickbind_select(){
 	Global axis_mapping1
+	Global axis_mapping2
 	Global button_mapping
 	Global hat_mapping
 	Global hat_axes
@@ -1028,12 +1029,18 @@ quickbind_select(){
 	last_beep := 0
 
 	joystate := Array()
+	altstate := Array()
 	
 	; Store starting state of axes for later comparison.
 	; If user has a throttle, it may be set at full...
 	For index, value in axis_mapping1 {
 		joystate[index] := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
-		;msgbox % joystate[value.id]
+		; Store state of alt (merge) axis too, so we can select using that
+		if (ts != "None" && axis_mapping2[A_Index].id != "None"){
+			altstate[index] := GetKeyState(axis_mapping2[A_Index].id . "Joy" . axis_list_ahk[axis_mapping2[A_Index].axis])
+		} else {
+			alstate[index] := -1
+		}
 	}
 
 	Loop, {
@@ -1115,8 +1122,13 @@ quickbind_select(){
 				; Main section for active axes
 				; Get input value
 				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
+				if (altstate[A_Index] != -1){
+					val2 := GetKeyState(axis_mapping2[A_Index].id . "Joy" . axis_list_ahk[axis_mapping2[A_Index].axis])
+				} else {
+					val2 := -1
+				}
 				
-				if (abs(val - joystate[index]) > 37.5){
+				if (abs(val - joystate[index]) > 37.5 || abs(val2 - altstate[index]) > 37.5){
 					; Switch to tab and select QB radio for this button
 					GuiControl, Choose,adhd_current_tab, 1
 					
