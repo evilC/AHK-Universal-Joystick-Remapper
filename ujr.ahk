@@ -6,6 +6,7 @@ ToDo:
 Before next release:
 
 Known Issues:
+* QuickBind may behave weirdly when running multiple copies as the same binding would trigger multiple times (once for each copy).
 
 Features:
 

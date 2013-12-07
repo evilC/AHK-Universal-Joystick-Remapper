@@ -12,14 +12,18 @@ Key:
 ! VJoy library was updated - be sure to copy the contents of VJoyLib folder over old copy!
 = Changed Axis Merging mechanism
   Should be simpler to understand now
-+ Can now control different virtual sticks and swap virtual stick on the fly
++ Axes and Buttons unavailable on the virtual stick are now disabled in UJR.
+  If your virtual stick only has 16 buttons, buttons 17-32 will be disabled in UJR.
++ Real-time detection of available axes / buttons.
+  If you alter the virtual stick config with UJR running, it will detect the changes and update accordingly.
++ Can now control different virtual sticks and swap virtual stick on the fly.
 + Can now run multiple copies of UJR simultaneously.
   Each copy of UJR can control a different virtual stick.
 + Axis Splitting
-  Can use half a physical axis to control a virtual axis
+  Can now use half a physical axis to control a virtual axis
 + Improved Deadzone / Sensitivity support
   Per-axis dz / sens support when doing axis merging
-  Rest H/L mode for applying dz / sens to one end of an axis (For throttle / pedal like axes)
+  Rest High / Low mode for applying dz / sens to one end of an axis (For throttle / pedal like axes)
 = Fixed bug with Copying profiles (Exiting and reloading would not result in copied profile being the current one)
 
 5.4 30th Nov 2013
