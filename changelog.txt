@@ -6,6 +6,11 @@ Key:
 = : Change / Fix
 + : Added feature
 
+6.1 10th Dec 2013
+= Fixed bug with axis merging.
+  Axis was being flipped in "Rests H" mode, also deadzone was applying wrong.
+  Sorry! I have no idea what I was smoking when I wrote that code!
+
 6.0 7th Dec 2013
 ! Profiles from previous versions of UJR are not compatible with this version
   Please delete or re-name uhr.ini

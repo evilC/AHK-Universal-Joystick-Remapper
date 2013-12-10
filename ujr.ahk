@@ -431,28 +431,16 @@ Loop{
 				}
 				
 				; Adjust axis according to invert / deadzone options etc
-				if (value.special == "None"){
-					rests := 0
-				} else {
-					tmp := instr(value.special, "Rests ")
-					if (tmp){
-						tmp := substr(value.special, 7)
-						if (tmp == "H"){
-							rests := 1
-						} else {
-							rests := -1
-						}
+				tmp := instr(value.special, "Rests ")
+				if (tmp){
+					tmp := substr(value.special, 7)
+					if (tmp == "H"){
+						rests := 1
 					} else {
-						tmp := instr(value.special, "Split ")
-						if (tmp){
-							tmp := substr(value.special, 7)
-							if (tmp == "H"){
-								rests := 1
-							} else {
-								rests := -1
-							}
-						}
+						rests := -1
 					}
+				} else {
+					rests := 0
 				}
 				val := AdjustAxis(val,value,rests)
 				if (axis2_configured){
@@ -562,9 +550,27 @@ return
 AdjustAxis(input,settings,rests){
 	if (rests == 0){
 		; Scale rests in middle
-		
+
+		; Axis Splitting
+		if (settings.special == "Split H"){
+			; rests low: 50-100 -> 0-100
+			if (input < 50){
+				output := 0
+			} else {
+				output := (input - 50) * 2
+			}
+		} else if (settings.special == "Split L"){
+			; rests high: 50-0 -> 0-100
+			if (input > 50){
+				output := 0
+			} else {
+				output := (50 - input) * 2
+			}
+		} else {		
+			output := input
+		}
 		; Shift from 0 -> 100 scale to -50 -> +50 scale
-		output := input - 50
+		output := output - 50
 		
 		; invert if needed
 		output := output * settings.invert
@@ -587,27 +593,9 @@ AdjustAxis(input,settings,rests){
 		; Shift back to proper scale
 		output := output + 50
 	} else {
-		if (settings.special == "None"){
-			output := input
-		} else {
-			if (settings.special == "Split H"){
-				; rests low: 50-100 -> 0-100
-				if (input < 50){
-					output := 0
-				} else {
-					output := (input - 50) * 2
-				}
-			} else {
-				; rests high: 50-0 -> 0-100
-				if (input > 50){
-					output := 0
-				} else {
-					output := (50 - input) * 2
-				}
-			}
-		}
-		; Scale rests at one end
-		
+		; scale rests at one end
+		output := input
+
 		; invert if needed
 		if (settings.invert == -1){
 			output := 100 - output
