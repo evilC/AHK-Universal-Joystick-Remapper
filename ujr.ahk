@@ -36,7 +36,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "6.0", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "6.3", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ;ADHD.config_default_app("CryENGINE")
@@ -173,7 +173,7 @@ Loop, 2 {
 		}
 		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_special_" A_Index, "x55 y" ypos " w65 h20 R9", tmp, "None")
 		
-		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
+		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_physical_stick_id_" A_Index, "x130 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "None")
 		axis%tabnum%_controls_physical_stick_id_%A_Index%_TT := "Selects which physical stick to use for this axis"
 		
 		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_physical_axis_" A_Index, "x190 y" ypos " w50 h20 R9", "None|1|2|3|4|5|6|7|8", "None")
@@ -234,7 +234,7 @@ Loop, %virtual_buttons% {
 	Gui, Add, Text, x%xpos% y%ypos2% w40 h20 , %A_Index%
 	
 	xpos := xbase + 62
-	ADHD.gui_add("DropDownList", "button_physical_stick_id_" A_Index, "x" xpos " y" ypos " w60 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
+	ADHD.gui_add("DropDownList", "button_physical_stick_id_" A_Index, "x" xpos " y" ypos " w60 h10 R9", "None|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "None")
 	button_physical_stick_id_%A_Index%_TT := "Select the physical stick for this button"
 	
 	xpos := xbase + 132
@@ -261,7 +261,7 @@ ypos2 := ypos -3
 
 Loop, % virtual_hats {
 	Gui, Add, Text, x30 y%ypos% w40 h20 , Hat %A_Index%
-	ADHD.gui_add("DropDownList", "hat_physical_stick_id_" A_Index, "x80 y" ypos " w50 h10 R9", "None|1|2|3|4|5|6|7|8", "None")
+	ADHD.gui_add("DropDownList", "hat_physical_stick_id_" A_Index, "x80 y" ypos " w50 h10 R9", "None|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "None")
 
 	Gui, Add, Text, x150 y%th2% w40 Center, Direction
 	Gui, Add, Text, x205 yp Center, State
@@ -344,7 +344,7 @@ Loop, %virtual_hats% {
 Gui, Tab
 
 Gui, Add, Button, x430 y339 vAutoConfigureButton gAutoConfigurePressed, Auto Configure Stick ID
-Gui, Add, DropDownList, x560 yp+1 w30 vAutoConfigureID, 1||2|3|4|5|6|7|8
+Gui, Add, DropDownList, x560 yp+1 w30 vAutoConfigureID, 1||2|3|4|5|6|7|8|9|10|11|12|13|14|15|16
 
 ; QUICKBIND FOOTER
 ; ---------------------

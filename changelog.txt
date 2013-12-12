@@ -6,6 +6,12 @@ Key:
 = : Change / Fix
 + : Added feature
 
+6.3 12th Dec 2013
+= Fixed missing 9-16 option for dropdowns to select stick ID for buttons, hats etc.
+
+6.2 12th Dec 2013
++ UJR now supports 16 physical joysticks (The max windows supports), instead of 8.
+
 6.1 10th Dec 2013
 = Fixed bug with axis merging.
   Axis was being flipped in "Rests H" mode, also deadzone was applying wrong.
