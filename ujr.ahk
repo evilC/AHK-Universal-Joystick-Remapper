@@ -36,7 +36,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "6.3", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "6.4", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ;ADHD.config_default_app("CryENGINE")
@@ -464,6 +464,14 @@ Loop{
 				; Set the value for this axis on the virtual stick
 				axismap := axis_list_vjoy[index]
 
+				; ToDo: This code SUCKS!
+				; re-write!!
+				; risky assumptions (low/high "no deflection" setting, when could be implied from "Rests" setting)
+				; Nasty use of vars...
+
+				tmp1 := val
+				tmp2 := val2
+
 				; rescale to vJoy style 0->32767
 				val := val * 327.67
 				val2 := val2 * 327.67
@@ -475,25 +483,34 @@ Loop{
 						val2 := (val + val2) / 2
 					} else {
 						; "Greatest" merge
-						if (value.invert == -1){
-							; low value is no deflection
-							def1 := val
+						if (axis1_controls_special_%index% == "None"){
+							if (abs(tmp1 - 50) > abs(tmp2 - 50)){
+								val2 := val
+							}
 						} else {
-							; high value is no deflection
-							def1 := 32767 - val
+							if (value.invert == -1){
+								; low value is no deflection
+								def1 := val
+							} else {
+								; high value is no deflection
+								def1 := 32767 - val
+							}
+							if (axis_mapping2[index].invert == -1){
+								; low value is no deflection
+								def2 := val2
+							} else {
+								; high value is no deflection
+								def2 := 32767 - val2
+							}
+							if (def1 > def2){
+								val2 := val /2
+							} else {
+								val2 := (32767/2) + (val2 / 2)
+							}
 						}
-						if (axis_mapping2[index].invert == -1){
-							; low value is no deflection
-							def2 := val2
-						} else {
-							; high value is no deflection
-							def2 := 32767 - val2
-						}
-						if (def1 > def2){
-							val2 := val /2
-						} else {
-							val2 := (32767/2) + (val2 / 2)
-						}
+						;msgbox % axis1_controls_special_%index%
+						;tooltip % 
+						;axis_1_controls_special_
 					}
 					VJoy_SetAxis(val2, vjoy_id, HID_USAGE_%axismap%)
 				} else {
