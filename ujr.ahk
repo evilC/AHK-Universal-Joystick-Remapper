@@ -54,10 +54,8 @@ ADHD.config_ini_version(ini_version)
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
-ADHD.config_hotkey_add({uiname: "QuickBind", subroutine: "QuickBind"})
-adhd_hk_k_1_TT := "Trigger QuickBind"
-ADHD.config_hotkey_add({uiname: "QuickBind Select", subroutine: "QuickBindSelect"})
-adhd_hk_k_2_TT := "Select Button / Axis for QuickBind"
+ADHD.config_hotkey_add({uiname: "QuickBind", subroutine: "QuickBind", tooltip: "Trigger QuickBind"})
+ADHD.config_hotkey_add({uiname: "QuickBind Select", subroutine: "QuickBindSelect", tooltip: "Select Button / Axis for QuickBind"})
 
 ; Hook into ADHD events
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
@@ -72,13 +70,13 @@ ADHD.config_event("on_exit", "on_exit_hook")
 ;ADHD.config_event("resolution_changed", "resolution_changed_hook")
 
 ; Add custom tabs
-ADHD.tab_list := Array("Axes 1", "Axes 2", "Buttons 1", "Buttons 2", "Hats")
+ADHD.config_tabs(Array("Axes 1", "Axes 2", "Buttons 1", "Buttons 2", "Hats"))
 
 ; Init ADHD
 ADHD.init()
-if (!ADHD.first_run && ADHD.loaded_ini_version != ini_version){
+if (!ADHD.is_first_run() && ADHD.get_ini_version() != ini_version){
 	msgbox This version of UJR is incompatible with your settings file.`nPlease delete or rename ujr.ini and re-launch UJR.`n`nExiting...
-	ADHD.write_version := 0
+	ADHD.config_write_version(0)
 	ExitApp
 }
 ADHD.create_gui()
@@ -743,7 +741,8 @@ QuickBindOptionChanged:
 ; EVENT HOOKS
 
 tab_changed_hook(){
-	Global adhd_current_tab
+	Global ADHD
+	current_tab := ADHD.get_current_tab()
 	
 	GuiControl, +Hidden, QuickBindLabelGroup
 	GuiControl, +Hidden, QuickBindLabelDelay
@@ -758,25 +757,25 @@ tab_changed_hook(){
 	GuiControl, +Hidden, AutoConfigureButton
 	GuiControl, +Hidden, AxisMergingInstructions
 
-	if (adhd_current_tab == "Axes 1" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
+	if (current_tab == "Axes 1" || current_tab == "Buttons 1" || current_tab == "Buttons 2" || current_tab == "Hats"){
 		GuiControl, -Hidden, QuickBindLabelGroup
 		GuiControl, -Hidden, QuickBindLabelDelay
 		GuiControl, -Hidden, QuickBindDelay
 		GuiControl, -Hidden, QuickBindLabelDuration
 		GuiControl, -Hidden, QuickBindDuration
 		GuiControl, -Hidden, QuickBindLabelInstructions
-		if (adhd_current_tab == "Axes 1"){
+		if (current_tab == "Axes 1"){
 			GuiControl, -Hidden, QuickBindLabelAxisType
 			GuiControl, -Hidden, QuickBindAxisType
 			GuiControl, -Hidden, AutoConfigureButton
 			GuiControl, -Hidden, AutoConfigureID
-		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
+		} else if (current_tab == "Buttons 1" || current_tab == "Buttons 2"){
 			GuiControl, -Hidden, AutoConfigureButton
 			GuiControl, -Hidden, AutoConfigureID
-		} else if (adhd_current_tab == "Hats"){
+		} else if (current_tab == "Hats"){
 		
 		}
-	} else if (adhd_current_tab == "Axes 2"){
+	} else if (current_tab == "Axes 2"){
 		GuiControl, -Hidden, AxisMergingInstructions
 	}
 }
@@ -963,8 +962,9 @@ on_exit_hook(){
 
 ; QuickBind triggered
 QuickBind:
+	current_tab := ADHD.get_current_tab()
 	; Work out what control we need to manipulate
-	if (adhd_current_tab == "Axes 1" || adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2" || adhd_current_tab == "Hats"){
+	if (current_tab == "Axes 1" || current_tab == "Buttons 1" || current_tab == "Buttons 2" || current_tab == "Hats"){
 		quick_bind_mode := 1
 
 		; set all configured axes to neutral position
@@ -993,7 +993,7 @@ QuickBind:
 		VJoy_SetContPov(-1, vjoy_id, 1)
 
 		; Find which tab we are on and which control is selected, then move it after a delay
-		if (adhd_current_tab == "Axes 1"){
+		if (current_tab == "Axes 1"){
 			play_quickbind_delay()
 			
 			axismap := axis_list_vjoy[QuickBindAxes]
@@ -1022,8 +1022,8 @@ QuickBind:
 				VJoy_SetAxis(0, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 			}
-		} else if (adhd_current_tab == "Buttons 1" || adhd_current_tab == "Buttons 2"){
-			if (adhd_current_tab == "Buttons 1"){
+		} else if (current_tab == "Buttons 1" || current_tab == "Buttons 2"){
+			if (current_tab == "Buttons 1"){
 				btn_id := 0
 				btn_group := 1
 			} else {
@@ -1041,7 +1041,7 @@ QuickBind:
 			
 			SetButtonState(btn_id,0)
 			VJoy_SetBtn(0, vjoy_id, btn_id)
-		} else if (adhd_current_tab == "Hats"){
+		} else if (current_tab == "Hats"){
 			play_quickbind_delay()
 
 			SetHatState(QuickBindHats,1)
@@ -1060,6 +1060,7 @@ QuickBindSelect:
 
 ; Selects a button / axis for quickbind by detecting what the user presses / moves	
 quickbind_select(){
+	global ADHD
 	Global axis_mapping1
 	Global axis_mapping2
 	Global button_mapping
@@ -1067,7 +1068,8 @@ quickbind_select(){
 	Global hat_axes
 	Global vjoy_id
 	Global axis_list_ahk
-	Global adhd_current_tab
+
+	current_tab := ADHD.get_current_tab()
 	
 	quickbind_start := A_TickCount
 	last_beep := 0
@@ -1124,7 +1126,7 @@ quickbind_select(){
 					tmp := QuickBindButtons1
 				}
 				tab := 2 + arr
-				GuiControl, Choose,adhd_current_tab, %tab%
+				ADHD.set_current_tab(tab)
 				
 				control, check,,,% "ahk_id " QB_B_%A_Index%%tmp%
 				Gui, Submit, NoHide
@@ -1146,7 +1148,7 @@ quickbind_select(){
 							continue
 						}
 						; Switch to tab and select QB radio for this button
-						GuiControl, Choose,adhd_current_tab, 5
+						ADHD.set_current_tab(5)
 						tab_changed_hook()
 						
 						control, check,,,% "ahk_id " QB_H_%A_Index%
@@ -1174,7 +1176,7 @@ quickbind_select(){
 				
 				if (abs(val - joystate[index]) > 37.5 || abs(val2 - altstate[index]) > 37.5){
 					; Switch to tab and select QB radio for this button
-					GuiControl, Choose,adhd_current_tab, 1
+					ADHD.set_current_tab(1)
 					
 					ax := value.axis
 					control, check,,,% "ahk_id " QB_A_%A_Index%
@@ -1210,7 +1212,7 @@ play_quickbind_delay(){
 }
 
 AutoConfigurePressed:
-	if (adhd_current_tab == "Axes 1"){
+	if (ADHD.get_current_tab() == "Axes 1"){
 		auto_configure_axes()
 	} else {
 		auto_configure_buttons()
