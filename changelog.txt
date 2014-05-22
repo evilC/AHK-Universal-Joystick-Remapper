@@ -6,6 +6,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+6.4 22nd May 2014
+= Updated to use latest version of ADHD
++ Bindings tab changed - no more Program Mode or ticking of Ctrl, Alt, Shift boxes.
+
 6.3 12th Dec 2013
 = Fixed missing 9-16 option for dropdowns to select stick ID for buttons, hats etc.
 

@@ -39,7 +39,6 @@ SetKeyDelay, 0, 50
 ADHD.config_about({name: "UJR", version: "6.4", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
-;ADHD.config_default_app("CryENGINE")
 
 ; GUI size
 ADHD.config_size(600,500)
