@@ -12,7 +12,7 @@ For more information, see the home page: http://evilc.com/joomla/index.php/artic
 Installation Instructions:
 
 1) Install vJoy 2.x
-http://sourceforge.net/projects/vjoystick/files/Beta%202.x/
+http://vjoystick.sourceforge.net/
 Note, if you had UJR 1.x installed, you will need to remove vJoy 1.x and install vJoy 2.x
 You will need to reboot to enter Test Mode, then vJoy will install before windows comes back up fully.
 
