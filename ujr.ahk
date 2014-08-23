@@ -478,7 +478,7 @@ Loop{
 					if (merge == 1){
 						; Standard merge
 						val2 := (val + val2) / 2
-					} else {
+					} else if (merge == 2){
 						; "Greatest" merge
 						if (axis1_controls_special_%index% == "None"){
 							if (abs(tmp1 - 50) > abs(tmp2 - 50)){
@@ -508,6 +508,14 @@ Loop{
 						;msgbox % axis1_controls_special_%index%
 						;tooltip % 
 						;axis_1_controls_special_
+					} else if (merge == 3){
+						; "Trim" merge
+						val  :=  val / 32767;
+						val2 := val2 / 32767;
+						val2 := val2 *.5 + .25;
+						a := 2 - 4*val2;
+						b := 4*val2 - 1;
+						val2 := 32767 * (a*val*val + b*val);
 					}
 					VJoy_SetAxis(val2, vjoy_id, HID_USAGE_%axismap%)
 				} else {
