@@ -512,12 +512,12 @@ Loop{
 						;axis_1_controls_special_
 					} else if (merge == 3){
 						; "Trim" merge
-						val  :=  val / 32767;
-						val2 := val2 / 32767;
-						val2 := val2 *.5 + .25;
-						a := 2 - 4*val2;
-						b := 4*val2 - 1;
-						val2 := 32767 * (a*val*val + b*val);
+						val  :=  val / 32767
+						val2 := val2 / 32767
+						val2 := val2 *.5 + .25
+						a := 2 - 4*val2
+						b := 4*val2 - 1
+						val2 := 32767 * (a*val*val + b*val)
 					}
 					VJoy_SetAxis(val2, vjoy_id, HID_USAGE_%axismap%)
 				} else {
