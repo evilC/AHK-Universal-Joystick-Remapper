@@ -165,8 +165,8 @@ Loop, 2 {
 			tmp := "None|Rests H|Rests L|Split H|Split L"
 			axis%tabnum%_controls_special_%A_Index%_TT := "Special Operations:`nRests (Low/High) - Makes Deadzone etc treat the high/low end of the axis as neutral.`nSplit (Low/High) - Uses only the low/high end of the physical axis."
 		} else {
-			tmp := "None|Merge|Greatest"
-			axis%tabnum%_controls_special_%A_Index%_TT := "Enables merging with axis " A_Index " on tab 'Axes 1'.`nMerge - A standard average of the two inputs.`nGreatest - whichever input is deflected the most."
+			tmp := "None|Merge|Greatest|Trim"
+			axis%tabnum%_controls_special_%A_Index%_TT := "Enables merging with axis " A_Index " on tab 'Axes 1'.`nMerge - A standard average of the two inputs.`nGreatest - whichever input is deflected the most.`nTrim - shift axis 1 center by axis 2."
 		}
 		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_special_" A_Index, "x55 y" ypos " w65 h20 R9", tmp, "None")
 		
@@ -374,8 +374,8 @@ tmp .= "This tab is used to configure Axis Merging - a feature that allows you t
 tmp .= "Each row on this tab corresponds to a row on the Axes 1 tab. Row 1 on this tab will be merged with row 1 on the Axes 1 tab.`n"
 tmp .= "Intended for use with axes that sit at one end when resting - for example to merge two pedal axes into one rudder axis.`n"
 tmp .= "On the 'Axes 1' tab: Configure the left pedal to move the slider left (use 'Invert' if needed), and set 'Special Ops' to 'Rest H'.`n"
-tmp .= "On the 'Axes 2' tab: Configure the right pedal to move the slider right, and set 'Axis Merging' to 'Merge' or 'Greatest' .`n"
-tmp .= "Merge averages the two axes, Greatest uses whichever axis is pressed the most."
+tmp .= "On the 'Axes 2' tab: Configure the right pedal to move the slider right, and set 'Axis Merging' to 'Merge', 'Greatest' or 'Trim' .`n"
+tmp .= "Merge averages the two axes, Greatest uses whichever axis is pressed the most, Trim shifts axis 1 using axis 2."
 Gui, Add, Text, x10 y345 vAxisMergingInstructions, %tmp%
 
 ; End GUI creation section
@@ -409,8 +409,10 @@ Loop{
 				if (axis_mapping2[index].special != "None"){
 					if (axis_mapping2[index].special == "Merge"){
 						merge := 1
-					} else {
+					} else if (axis_mapping2[index].special == "Greatest"){
 						merge := 2
+					} else if (axis_mapping2[index].special == "Trim"){
+						merge := 3
 					}
 				} else {
 					merge := 0
