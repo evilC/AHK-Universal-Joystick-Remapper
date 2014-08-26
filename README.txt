@@ -3,6 +3,7 @@ AHK-Universal-Joystick-Remapper
 
 UJR - evilC's Universal Joystick Remapper
 evilc@evilc.com
+Trim mode by PhoenixBvo
 
 An AutoHotKey GUI script to remap one or more physical joysticks to a virtual joystick.
 For more information, see the home page: http://evilc.com/joomla/index.php/articles/9-code/autohotkey/1-ujr-universal-joystick-remapper
