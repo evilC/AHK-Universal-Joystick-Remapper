@@ -6,6 +6,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+6.5 26th Aug 2014
++ Trim mode added to axis merging features - you can now use one axis to trim another axis.
+  Code contributed by PhoenixBvo, thanks!
+
 6.4 22nd May 2014
 = Updated to use latest version of ADHD
 + Bindings tab changed - no more Program Mode or ticking of Ctrl, Alt, Shift boxes.
