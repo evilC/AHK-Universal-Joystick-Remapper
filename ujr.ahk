@@ -82,7 +82,6 @@ ADHD.create_gui()
 
 ; Init the PPJoy / vJoy library
 #include VJoyLib\VJoy_lib.ahk
-LoadPackagedLibrary()
 
 vjoy_id := 0		; The current vjoy device the app is trying to use. Also serves as a "last item selected" for the vjoy id dropdown
 vjoy_ready := 0		; Whether the vjoy_id is connected and under the app's control
@@ -1259,20 +1258,6 @@ auto_configure_buttons(){
 	ADHD.option_changed()
 	return
 }
-
-; Loads the vJoy DLL
-LoadPackagedLibrary() {
-    if (A_PtrSize < 8) {
-        dllpath = VJoyLib\x86\vJoyInterface.dll
-    } else {
-        dllpath = VJoyLib\x64\vJoyInterface.dll
-    }
-    hDLL := DLLCall("LoadLibrary", "Str", dllpath)
-    if (!hDLL) {
-        MsgBox, [%A_ThisFunc%] LoadLibrary %dllpath% fail
-    }
-    return hDLL
-} 
 
 ; ===================================================================================================
 ; FOOTER SECTION
