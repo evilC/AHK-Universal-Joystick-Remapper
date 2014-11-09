@@ -26,39 +26,50 @@
 ; Load lib from already load or current/system directory
 VJoy_LoadLibrary() {
     Global hVJDLL
+
     if (hVJDLL) {
         return hVJDLL
     }
- 
-    ; Load dll from any path or get handle of already loaded
-    hVJDLL := DLLCall("LoadLibrary", "Str", "vJoyInterface")
-    if (hVJDLL) {
-        return hVJDLL
+    ; Find vJoy install folder. This should always be in the "Program Files" folder (but name may be different on non-English systems)
+    ; ToDo: Replace with registry lookup?
+    
+    if (A_Is64bitOS){
+        EnvGet, ProgFiles, ProgramW6432
+    } else {
+        EnvGet, ProgFiles, ProgramFiles
     }
- 
-    ; If dll deployed into current and it was wrong, warn
-    dllpath = %A_ScriptDir%\vJoyInterface.dll
-    if (FileExist(dllpath)) {
-        if (A_Is64bitOS) {
-            is64bit = 64-bitOS
+
+    vJoyFolder := ProgFiles "\vJoy"
+    DllFile := "vJoyInterface.dll"
+    DllPath := "\" DllFile
+
+    ErrorReport := "Trying to locate correct " DllFile "...`nLooking in " vJoyFolder "... "
+    if (FileExist(vJoyFolder DllPath)){
+        ErrorReport .= "FOUND. Loading... "
+        ; Try loading DLL from main folder
+        hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder DllPath)
+        if (!hVJDLL) {
+            ErrorReport .= "FAILED.`n"
+            ErrorReport .= "Looking in " vJoyFolder "\Feeder... "
+            if (FileExist(vJoyFolder "\Feeder" DllPath)){
+                ErrorReport .= "FOUND. Loading..."
+                ; Failed - Try loading DLL from "Feeder" folder. On x64 systems, this will contain an x86 DLL
+                hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder "\Feeder" DllPath)
+                if (!hVJDLL) {
+                    ErrorReport .= "FAILED.`n"
+                }
+            } else {
+                ErrorReport .= "NOT FOUND.`n"
+            }
         }
-        AHKEd := (A_PtrSize = 4) ? "32-bit" : "64-bit"
-        RequiredDLL := (A_PtrSize = 4) ? "x86" : "x64"
-        dll_info := GetFileVersion(dllpath)
-        if (dll_info and !InStr(dll_info, RequiredDLL)) {
-            isWrong = =wrong!
-        }
-        MsgBox,
-        (
-LoadLibrary %dllpath% failed!
-Exiting.
-Make sure %RequiredDLL% vJoyInterface.dll is in %A_ScriptDir%
-    (%dll_info%%isWrong%)
-    AutoHotkey: %AHKEd%
-    OSVersion:%A_OSVersion% %is64bit%
-        )
+    } else {
+        ErrorReport .= "NOT FOUND.`n"
     }
-    return 0
+    if (!hVJDLL) {
+        MsgBox % "Failed to load interface DLL.`n`n" ErrorReport
+        return 0
+    }
+    return hVJDLL
 }
  
 GetFileVersion(pszFilePath) {
