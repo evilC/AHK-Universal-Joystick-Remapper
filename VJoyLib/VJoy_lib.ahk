@@ -50,7 +50,7 @@ VJoy_LoadLibrary() {
         hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder DllFile)
         if (!hVJDLL) {
             ErrorReport .= "FAILED.`n"
-            ErrorReport .= "Looking in " vJoyFolder "\Feeder... "
+            ErrorReport .= "Looking in " vJoyFolder "Feeder... "
             if (FileExist(vJoyFolder "Feeder\" DllFile)){
                 ErrorReport .= "FOUND. Loading..."
                 ; Failed - Try loading DLL from "Feeder" folder. On x64 systems, this will contain an x86 DLL
