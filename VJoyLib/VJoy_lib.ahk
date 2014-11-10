@@ -30,31 +30,29 @@ VJoy_LoadLibrary() {
     if (hVJDLL) {
         return hVJDLL
     }
-    ; Find vJoy install folder. This should always be in the "Program Files" folder (but name may be different on non-English systems)
-    ; ToDo: Replace with registry lookup?
-    
-    if (A_Is64bitOS){
-        EnvGet, ProgFiles, ProgramW6432
-    } else {
-        EnvGet, ProgFiles, ProgramFiles
+    ; Find vJoy install folder by looking for registry key.
+    vJoyFolder := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{8E31F76F-74C3-47F1-9550-E041EEDC5FBB}_is1", "InstallLocation")
+    if (!vJoyFolder){
+        msgbox 4, ERROR, % "ERROR: Could not find the vJoy Registry Key.`n`nvJoy does not appear to be installed.`nPlease ensure you have installed vJoy from`n`nhttp://vjoystick.sourceforge.net.`n`nDo you wish to open a browser window to the site now?"
+        IfMsgBox, Yes
+            Run http://vjoystick.sourceforge.net
+        ExitApp
     }
 
-    vJoyFolder := ProgFiles "\vJoy"
     DllFile := "vJoyInterface.dll"
-    DllPath := "\" DllFile
 
     ErrorReport := "Trying to locate correct " DllFile "...`nLooking in " vJoyFolder "... "
-    if (FileExist(vJoyFolder DllPath)){
+    if (FileExist(vJoyFolder DllFile)){
         ErrorReport .= "FOUND. Loading... "
         ; Try loading DLL from main folder
-        hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder DllPath)
+        hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder DllFile)
         if (!hVJDLL) {
             ErrorReport .= "FAILED.`n"
             ErrorReport .= "Looking in " vJoyFolder "\Feeder... "
-            if (FileExist(vJoyFolder "\Feeder" DllPath)){
+            if (FileExist(vJoyFolder "Feeder\" DllFile)){
                 ErrorReport .= "FOUND. Loading..."
                 ; Failed - Try loading DLL from "Feeder" folder. On x64 systems, this will contain an x86 DLL
-                hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder "\Feeder" DllPath)
+                hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder "Feeder\" DllFile)
                 if (!hVJDLL) {
                     ErrorReport .= "FAILED.`n"
                 }
@@ -847,4 +845,88 @@ parse_rel_val(invar, curval, max) {
         return res
     }
     return invar
+}
+
+; x64 compatible registry read from http://www.autohotkey.com/board/topic/36290-regread64-and-regwrite64-no-redirect-to-wow6432node/
+RegRead64(sRootKey, sKeyName, sValueName = "", DataMaxSize=1024) {
+    HKEY_CLASSES_ROOT   := 0x80000000   ; http://msdn.microsoft.com/en-us/library/aa393286.aspx
+    HKEY_CURRENT_USER   := 0x80000001
+    HKEY_LOCAL_MACHINE  := 0x80000002
+    HKEY_USERS          := 0x80000003
+    HKEY_CURRENT_CONFIG := 0x80000005
+    HKEY_DYN_DATA       := 0x80000006
+    HKCR := HKEY_CLASSES_ROOT
+    HKCU := HKEY_CURRENT_USER
+    HKLM := HKEY_LOCAL_MACHINE
+    HKU  := HKEY_USERS
+    HKCC := HKEY_CURRENT_CONFIG
+    
+    REG_NONE                := 0    ; http://msdn.microsoft.com/en-us/library/ms724884.aspx
+    REG_SZ                  := 1
+    REG_EXPAND_SZ           := 2
+    REG_BINARY              := 3
+    REG_DWORD               := 4
+    REG_DWORD_BIG_ENDIAN    := 5
+    REG_LINK                := 6
+    REG_MULTI_SZ            := 7
+    REG_RESOURCE_LIST       := 8
+
+    KEY_QUERY_VALUE := 0x0001   ; http://msdn.microsoft.com/en-us/library/ms724878.aspx
+    KEY_WOW64_64KEY := 0x0100   ; http://msdn.microsoft.com/en-gb/library/aa384129.aspx (do not redirect to Wow6432Node on 64-bit machines)
+    KEY_SET_VALUE   := 0x0002
+    KEY_WRITE       := 0x20006
+
+    myhKey := %sRootKey%        ; pick out value (0x8000000x) from list of HKEY_xx vars
+    IfEqual,myhKey,, {      ; Error - Invalid root key
+        ErrorLevel := 3
+        return ""
+    }
+    
+    RegAccessRight := KEY_QUERY_VALUE + KEY_WOW64_64KEY
+    
+    DllCall("Advapi32.dll\RegOpenKeyExA", "uint", myhKey, "str", sKeyName, "uint", 0, "uint", RegAccessRight, "uint*", hKey)    ; open key
+    DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint*", sValueType, "uint", 0, "uint", 0)     ; get value type
+    If (sValueType == REG_SZ or sValueType == REG_EXPAND_SZ) {
+        VarSetCapacity(sValue, vValueSize:=DataMaxSize)
+        DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sValue, "uint*", vValueSize) ; get string or string-exp
+    } Else If (sValueType == REG_DWORD) {
+        VarSetCapacity(sValue, vValueSize:=4)
+        DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "uint*", sValue, "uint*", vValueSize)   ; get dword
+    } Else If (sValueType == REG_MULTI_SZ) {
+        VarSetCapacity(sTmp, vValueSize:=DataMaxSize)
+        DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)   ; get string-mult
+        sValue := ExtractData(&sTmp) "`n"
+        Loop {
+            If (errorLevel+2 >= &sTmp + vValueSize)
+                Break
+            sValue := sValue ExtractData( errorLevel+1 ) "`n" 
+        }
+    } Else If (sValueType == REG_BINARY) {
+        VarSetCapacity(sTmp, vValueSize:=DataMaxSize)
+        DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)   ; get binary
+        sValue := ""
+        SetFormat, integer, h
+        Loop %vValueSize% {
+            hex := SubStr(Asc(SubStr(sTmp,A_Index,1)),3)
+            StringUpper, hex, hex
+            sValue := sValue hex
+        }
+        SetFormat, integer, d
+    } Else {                ; value does not exist or unsupported value type
+        DllCall("Advapi32.dll\RegCloseKey", "uint", hKey)
+        ErrorLevel := 1
+        return ""
+    }
+    DllCall("Advapi32.dll\RegCloseKey", "uint", hKey)
+    return sValue
+}
+
+ExtractData(pointer) {  ; http://www.autohotkey.com/forum/viewtopic.php?p=91578#91578 SKAN
+    Loop {
+            errorLevel := ( pointer+(A_Index-1) )
+            Asc := *( errorLevel )
+            IfEqual, Asc, 0, Break ; Break if NULL Character
+            String := String . Chr(Asc)
+        }
+    Return String
 }
