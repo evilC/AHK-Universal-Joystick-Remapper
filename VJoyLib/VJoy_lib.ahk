@@ -32,39 +32,64 @@ VJoy_LoadLibrary() {
     if (hVJDLL) {
         return hVJDLL
     }
-    ; Find vJoy install folder by looking for registry key.
-    vJoyFolder := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{8E31F76F-74C3-47F1-9550-E041EEDC5FBB}_is1", "InstallLocation")
-    if (!vJoyFolder){
-        msgbox 4, ERROR, % "ERROR: Could not find the vJoy Registry Key.`n`nvJoy does not appear to be installed.`nPlease ensure you have installed vJoy from`n`nhttp://vjoystick.sourceforge.net.`n`nDo you wish to open a browser window to the site now?"
-        IfMsgBox, Yes
-            Run http://vjoystick.sourceforge.net
-        ExitApp
-    }
 
     DllFile := "vJoyInterface.dll"
+    ErrorReport := ""
 
-    ErrorReport := "Trying to locate correct " DllFile "...`nLooking in " vJoyFolder "... "
-    if (FileExist(vJoyFolder DllFile)){
-        ErrorReport .= "FOUND. Loading... "
-        ; Try loading DLL from main folder
-        hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder DllFile)
-        if (!hVJDLL) {
+    if (FileExist("VJoyLib\x64\" DllFile) && FileExist("VJoyLib\x86\" DllFile)){
+        ; vJoyLib Folder found with DLLs inside - use these.
+        ErrorReport .= "Found DLLs in VJoyLib folder - using those...`n"
+        if (A_PtrSize == 8 && A_Is64bitOS){
+            ErrorReport .= "This is an x64 script on a x64 system - loading x64 DLL... "
+            hVJDLL := DLLCall("LoadLibrary", "Str","VJoyLib\x64\" DllFile)
+        } else {
+            ErrorReport .= "This is an x86 script - loading x86 DLL... "
+            hVJDLL := DLLCall("LoadLibrary", "Str","VJoyLib\x86\" DllFile)
+        }
+        if (hVJDLL) {
+            ErrorReport .= "OK`n"
+        } else {
             ErrorReport .= "FAILED.`n"
-            ErrorReport .= "Looking in " vJoyFolder "Feeder... "
-            if (FileExist(vJoyFolder "Feeder\" DllFile)){
-                ErrorReport .= "FOUND. Loading..."
-                ; Failed - Try loading DLL from "Feeder" folder. On x64 systems, this will contain an x86 DLL
-                hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder "Feeder\" DllFile)
-                if (!hVJDLL) {
-                    ErrorReport .= "FAILED.`n"
-                }
-            } else {
-                ErrorReport .= "NOT FOUND.`n"
-            }
         }
     } else {
-        ErrorReport .= "NOT FOUND.`n"
+        ; Try and use DLLs from vJoy install folder.
+        ; Find vJoy install folder by looking for registry key.
+        vJoyFolder := RegRead64("HKEY_LOCAL_MACHINE", "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{8E31F76F-74C3-47F1-9550-E041EEDC5FBB}_is1", "InstallLocation")
+        if (!vJoyFolder){
+            msgbox 4, ERROR, % "ERROR: Could not find the vJoy Registry Key.`n`nvJoy does not appear to be installed.`nPlease ensure you have installed vJoy from`n`nhttp://vjoystick.sourceforge.net.`n`nDo you wish to open a browser window to the site now?"
+            IfMsgBox, Yes
+                Run http://vjoystick.sourceforge.net
+            ExitApp
+        }
+
+        ErrorReport .= "Trying to locate correct " DllFile "...`nLooking in " vJoyFolder "... "
+        if (FileExist(vJoyFolder DllFile)){
+            ErrorReport .= "FOUND. Loading... "
+            ; Try loading DLL from main folder
+            hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder DllFile)
+            if (hVJDLL) {
+                ErrorReport .= "OK`n"
+            } else {
+                ErrorReport .= "FAILED.`n"
+                ErrorReport .= "Looking in " vJoyFolder "Feeder... "
+                if (FileExist(vJoyFolder "Feeder\" DllFile)){
+                    ErrorReport .= "FOUND. Loading..."
+                    ; Failed - Try loading DLL from "Feeder" folder. On x64 systems, this will contain an x86 DLL
+                    hVJDLL := DLLCall("LoadLibrary", "Str", vJoyFolder "Feeder\" DllFile)
+                    if (hVJDLL) {
+                        ErrorReport .= "OK`n"
+                    } else {
+                        ErrorReport .= "FAILED.`n"
+                    }
+                } else {
+                    ErrorReport .= "NOT FOUND.`n"
+                }
+            }
+        } else {
+            ErrorReport .= "NOT FOUND.`n"
+        }
     }
+
     if (!hVJDLL) {
         MsgBox % "Failed to load interface DLL.`n`n" ErrorReport
         return 0
@@ -877,26 +902,27 @@ RegRead64(sRootKey, sKeyName, sValueName = "", DataMaxSize=1024) {
     KEY_WOW64_64KEY := 0x0100   ; http://msdn.microsoft.com/en-gb/library/aa384129.aspx (do not redirect to Wow6432Node on 64-bit machines)
     KEY_SET_VALUE   := 0x0002
     KEY_WRITE       := 0x20006
+    ENC := A_IsUnicode?"W":"A"
+    hKey := "", sValueType := ""
 
     myhKey := %sRootKey%        ; pick out value (0x8000000x) from list of HKEY_xx vars
     IfEqual,myhKey,, {      ; Error - Invalid root key
         ErrorLevel := 3
         return ""
     }
-    
     RegAccessRight := KEY_QUERY_VALUE + KEY_WOW64_64KEY
-    
-    DllCall("Advapi32.dll\RegOpenKeyExA", "uint", myhKey, "str", sKeyName, "uint", 0, "uint", RegAccessRight, "uint*", hKey)    ; open key
-    DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint*", sValueType, "uint", 0, "uint", 0)     ; get value type
+    ;VarSetCapacity(sValueType, 4)
+    DllCall("Advapi32.dll\RegOpenKeyEx" ENC, "uint", myhKey, "str", sKeyName, "uint", 0, "uint", RegAccessRight, "uint*", hKey)    ; open key
+    DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint*", sValueType, "uint", 0, "uint", 0)     ; get value type
     If (sValueType == REG_SZ or sValueType == REG_EXPAND_SZ) {
         VarSetCapacity(sValue, vValueSize:=DataMaxSize)
-        DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sValue, "uint*", vValueSize) ; get string or string-exp
+        DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sValue, "uint*", vValueSize) ; get string or string-exp
     } Else If (sValueType == REG_DWORD) {
         VarSetCapacity(sValue, vValueSize:=4)
-        DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "uint*", sValue, "uint*", vValueSize)   ; get dword
+        DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "uint*", sValue, "uint*", vValueSize)   ; get dword
     } Else If (sValueType == REG_MULTI_SZ) {
         VarSetCapacity(sTmp, vValueSize:=DataMaxSize)
-        DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)   ; get string-mult
+        DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)   ; get string-mult
         sValue := ExtractData(&sTmp) "`n"
         Loop {
             If (errorLevel+2 >= &sTmp + vValueSize)
@@ -905,7 +931,7 @@ RegRead64(sRootKey, sKeyName, sValueName = "", DataMaxSize=1024) {
         }
     } Else If (sValueType == REG_BINARY) {
         VarSetCapacity(sTmp, vValueSize:=DataMaxSize)
-        DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)   ; get binary
+        DllCall("Advapi32.dll\RegQueryValueEx" ENC, "uint", hKey, "str", sValueName, "uint", 0, "uint", 0, "str", sTmp, "uint*", vValueSize)   ; get binary
         sValue := ""
         SetFormat, integer, h
         Loop %vValueSize% {
