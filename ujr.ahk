@@ -36,7 +36,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "6.5", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "6.6", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 
@@ -81,7 +81,8 @@ if (!ADHD.is_first_run() && ADHD.get_ini_version() != ini_version){
 ADHD.create_gui()
 
 ; Init the PPJoy / vJoy library
-#include VJoyLib\VJoy_lib.ahk
+;#include VJoyLib\VJoy_lib.ahk
+#include <VJoy_lib>
 
 vjoy_id := 0		; The current vjoy device the app is trying to use. Also serves as a "last item selected" for the vjoy id dropdown
 vjoy_ready := 0		; Whether the vjoy_id is connected and under the app's control
