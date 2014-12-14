@@ -483,7 +483,7 @@ Loop{
 					} else if (merge == 2){
 						; "Greatest" merge
 						if (axis1_controls_special_%index% == "None"){
-							if (abs(tmp1 - 50) > abs(tmp2 - 50)){
+							if ( tmp1 > tmp2 ){
 								val2 := val
 							}
 						} else {
