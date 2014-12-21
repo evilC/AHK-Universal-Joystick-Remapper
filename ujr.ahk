@@ -36,7 +36,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "6.6", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "6.7", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 
@@ -95,6 +95,11 @@ axis_list_vjoy := Array("X","Y","Z","RX","RY","RZ","SL0","SL1")
 
 ; The order in which the state buttons for the hat
 hat_axes := Array("u","d","l","r")
+
+vjoy_max := 32768
+vjoy_mid := vjoy_max / 2
+vjoy_min := 0
+ahk_vjoy_factor := 327.68
 
 quick_bind_mode := 0
 ; Configure virtual stick capabilities. Set to max capabilities that app supports, so all UI elements created at start
@@ -471,9 +476,9 @@ Loop{
 				tmp1 := val
 				tmp2 := val2
 
-				; rescale to vJoy style 0->32767
-				val := val * 327.67
-				val2 := val2 * 327.67
+				; rescale to vJoy style 0->32768
+				val := val * ahk_vjoy_factor
+				val2 := val2 * ahk_vjoy_factor
 				
 				ax := value.axis
 				if (merge){
@@ -492,19 +497,19 @@ Loop{
 								def1 := val
 							} else {
 								; high value is no deflection
-								def1 := 32767 - val
+								def1 := vjoy_max - val
 							}
 							if (axis_mapping2[index].invert == -1){
 								; low value is no deflection
 								def2 := val2
 							} else {
 								; high value is no deflection
-								def2 := 32767 - val2
+								def2 := vjoy_max - val2
 							}
 							if (def1 > def2){
-								val2 := val /2
+								val2 := val / 2
 							} else {
-								val2 := (32767/2) + (val2 / 2)
+								val2 := vjoy_mid + (val2 / 2)
 							}
 						}
 						;msgbox % axis1_controls_special_%index%
@@ -512,12 +517,12 @@ Loop{
 						;axis_1_controls_special_
 					} else if (merge == 3){
 						; "Trim" merge
-						val  :=  val / 32767
-						val2 := val2 / 32767
+						val  :=  val / vjoy_max
+						val2 := val2 / vjoy_max
 						val2 := val2 *.5 + .25
 						a := 2 - 4*val2
 						b := 4*val2 - 1
-						val2 := 32767 * (a*val*val + b*val)
+						val2 := vjoy_max * (a*val*val + b*val)
 					}
 					VJoy_SetAxis(val2, vjoy_id, HID_USAGE_%axismap%)
 				} else {
@@ -981,7 +986,7 @@ QuickBind:
 			axismap := axis_list_vjoy[index]
 			if (VJoy_GetAxisExist_%axismap%(vjoy_id)){
 				GuiControl,,axis1_controls_state_slider_%index%,50
-				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
+				VJoy_SetAxis(vjoy_mid, vjoy_id, HID_USAGE_%axismap%)
 			}
 		}
 		
@@ -1008,7 +1013,7 @@ QuickBind:
 			axismap := axis_list_vjoy[QuickBindAxes]
 			if (QuickBindAxisType == "High-Low"){
 				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,100
-				VJoy_SetAxis(32767, vjoy_id, HID_USAGE_%axismap%)
+				VJoy_SetAxis(vjoy_max, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
 				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,0
@@ -1016,15 +1021,15 @@ QuickBind:
 				;Sleep, % (QuickBindDuration * 1000 ) / 2
 			} else if (QuickBindAxisType == "Mid-High"){
 				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,50
-				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
+				VJoy_SetAxis(vjoy_mid, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
 				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,100
-				VJoy_SetAxis(32767, vjoy_id, HID_USAGE_%axismap%)
+				VJoy_SetAxis(vjoy_max, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 			} else {
 				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,50
-				VJoy_SetAxis(16383.5, vjoy_id, HID_USAGE_%axismap%)
+				VJoy_SetAxis(vjoy_mid, vjoy_id, HID_USAGE_%axismap%)
 				Sleep, % (QuickBindDuration * 1000 ) / 2
 				
 				GuiControl,,axis1_controls_state_slider_%QuickBindAxes%,0
