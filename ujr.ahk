@@ -36,7 +36,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "6.7", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a>"})
+ADHD.config_about({name: "UJR", version: "6.6", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a> / <a href=""https://github.com/evilC/AHK-Universal-Joystick-Remapper/issues"">Bug Tracker</a> / <a href=""http://ahkscript.org/boards/viewtopic.php?f=19&t=5671"">Forum Thread</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 
@@ -81,7 +81,6 @@ if (!ADHD.is_first_run() && ADHD.get_ini_version() != ini_version){
 ADHD.create_gui()
 
 ; Init the PPJoy / vJoy library
-;#include VJoyLib\VJoy_lib.ahk
 #include <VJoy_lib>
 
 vjoy_id := 0		; The current vjoy device the app is trying to use. Also serves as a "last item selected" for the vjoy id dropdown
@@ -426,11 +425,9 @@ Loop{
 					axis_two := GetKeyState(axis_mapping2[index].id . "Joy" . axis_list_ahk[axis_mapping2[index].axis])
 				}
 
-				; Display input value, rescale to -100 to +100
-				;GuiControl,, axis1_controls_physical_value_%index%, % round((val-50)*2,2)
+				; Display input value in AHK format, rounded
 				GuiControl,, axis1_controls_physical_value_%index%, % round(axis_one,2)
 				if (axis2_configured){
-					;GuiControl,, axis2_controls_physical_value_%index%, % round((axis_two-50)*2,2)
 					GuiControl,, axis2_controls_physical_value_%index%, % round(axis_two,2)
 				}
 				
@@ -453,11 +450,9 @@ Loop{
 					axis_two := AdjustAxis(axis_two,axis_mapping2[index],rests)
 				}
 				
-				; Display output value, rescale to -100 to +100
-				;GuiControl,, axis1_controls_virtual_value_%index%, % round((axis_one-50)*2,2)
+				; Display output value in AHK format
 				GuiControl,, axis1_controls_virtual_value_%index%, % round(axis_one,2)
 				if (axis2_configured){
-					;GuiControl,, axis2_controls_virtual_value_%index%, % round((axis_two-50)*2,2)
 					GuiControl,, axis2_controls_virtual_value_%index%, % round(axis_two,2)
 				}
 				; Move slider to show input value
@@ -465,16 +460,12 @@ Loop{
 				if (axis2_configured){
 					GuiControl,, axis2_controls_state_slider_%index%, % axis_two
 				}
-				; Set the value for this axis on the virtual stick
+				; Get the value for this axis on the virtual stick
 				axismap := axis_list_vjoy[index]
 
 				; ToDo: This code SUCKS!
 				; re-write!!
 				; risky assumptions (low/high "no deflection" setting, when could be implied from "Rests" setting)
-				; Nasty use of vars...
-
-				tmp1 := axis_one
-				tmp2 := axis_two
 
 				; rescale to vJoy style 0->32768
 				axis_one := AHKToVjoy(axis_one)
@@ -482,18 +473,21 @@ Loop{
 				
 				ax := value.axis
 				if (merge){
-					; Merge mode - axis_two will be used for the output value
+					; Merge mode
+					out := axis_one 	; default output to 1st axis
 					if (merge == 1){
 						; Standard merge
-						axis_two := (axis_one + axis_two) / 2
+						out := (axis_one + axis_two) / 2
 					} else if (merge == 2){
 						; "Greatest" merge
-						if (axis1_controls_special_%index% == "None"){ ; This code only deals with "mid" resting axes for now
-							if ( abs(AHKToZeroCentered(tmp1)) > abs(AHKToZeroCentered(tmp2)) ){
+						if (axis1_controls_special_%index% == "None"){
+							; Rests Middle
+							if ( axis_two > axis_one ){
 								; If the 1st axis is deflected by more than the 2nd axis
-								axis_two := axis_one
-							} else {}
+								out := axis_two
+							}
 						} else {
+							; Axis does not rest at middle position
 							if (value.invert == -1){
 								; low value is no deflection
 								def1 := axis_one
@@ -508,15 +502,13 @@ Loop{
 								; high value is no deflection
 								def2 := vjoy_max - axis_two
 							}
+							; Which axis is deflected more?
 							if (def1 > def2){
-								axis_two := axis_one / 2
+								out := axis_one / 2
 							} else {
-								axis_two := vjoy_mid + (axis_two / 2)
+								out := vjoy_mid + (axis_two / 2)
 							}
 						}
-						;msgbox % axis1_controls_special_%index%
-						;tooltip % 
-						;axis_1_controls_special_
 					} else if (merge == 3){
 						; "Trim" merge
 						axis_one  :=  axis_one / vjoy_max
@@ -524,9 +516,9 @@ Loop{
 						axis_two := axis_two *.5 + .25
 						a := 2 - 4*axis_two
 						b := 4*axis_two - 1
-						axis_two := vjoy_max * (a*axis_one*axis_one + b*axis_one)
+						out := vjoy_max * (a*axis_one*axis_one + b*axis_one)
 					}
-					VJoy_SetAxis(axis_two, vjoy_id, HID_USAGE_%axismap%)
+					VJoy_SetAxis(out, vjoy_id, HID_USAGE_%axismap%)
 				} else {
 					VJoy_SetAxis(axis_one, vjoy_id, HID_USAGE_%axismap%)
 				}
@@ -623,7 +615,7 @@ AdjustAxis(input,settings,rests){
 			output := input
 		}
 		; Shift from 0 -> 100 scale to -50 -> +50 scale
-		output := output - 50
+		output := AHKToZeroCentered(output)
 		
 		; invert if needed
 		output := output * settings.invert
@@ -644,7 +636,7 @@ AdjustAxis(input,settings,rests){
 		}
 		
 		; Shift back to proper scale
-		output := output + 50
+		output := ZeroCenteredToAHK(output)
 	} else {
 		; scale rests at one end
 		output := input

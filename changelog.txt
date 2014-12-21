@@ -6,10 +6,15 @@ Key:
 = : Change / Fix
 + : Added feature
 
-6.6 - UNRELEASED
-+ Now uses vJoy DLLs from the vJoy installation folder.
+6.6 - 21st Dec 2014
++ Added in-app links to Github / Forum etc.
+= Fixed bad maths. UJR now correctly uses output values in the range 0->32768, not 0->32767
+  Shouldn't really affect much, such a small deviation was probably never noticed!
+= "Greatest" merge mode fix for pedals (Rests L/H axes) - thanks to CJBrew for this one!
+= Now tries to use the vJoy DLLs from the vJoy installation folder.
   Will fall back to looking for the vJoyLib folder if it does not find those though.
-+ For those that use the AHK version, the vjoy library is now a separate project.
+! For those that use the AHK version, the vjoy library is now a separate project:
+  https://github.com/evilC/AHK-vJoy-Library
 
 6.5 26th Aug 2014
 + Trim mode added to axis merging features - you can now use one axis to trim another axis.
