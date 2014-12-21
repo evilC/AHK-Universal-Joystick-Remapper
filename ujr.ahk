@@ -408,7 +408,7 @@ Loop{
 				
 				; Main section for active axes
 				; Get input value
-				val := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
+				axis_one := GetKeyState(value.id . "Joy" . axis_list_ahk[value.axis])
 				
 				axis2_configured := axis_mapping2[index].id != "None" && axis_mapping2[index].axis != "None"
 				if (axis_mapping2[index].special != "None"){
@@ -423,15 +423,15 @@ Loop{
 					merge := 0
 				}
 				if (axis2_configured){
-					val2 := GetKeyState(axis_mapping2[index].id . "Joy" . axis_list_ahk[axis_mapping2[index].axis])
+					axis_two := GetKeyState(axis_mapping2[index].id . "Joy" . axis_list_ahk[axis_mapping2[index].axis])
 				}
 
 				; Display input value, rescale to -100 to +100
 				;GuiControl,, axis1_controls_physical_value_%index%, % round((val-50)*2,2)
-				GuiControl,, axis1_controls_physical_value_%index%, % round(val,2)
+				GuiControl,, axis1_controls_physical_value_%index%, % round(axis_one,2)
 				if (axis2_configured){
-					;GuiControl,, axis2_controls_physical_value_%index%, % round((val2-50)*2,2)
-					GuiControl,, axis2_controls_physical_value_%index%, % round(val2,2)
+					;GuiControl,, axis2_controls_physical_value_%index%, % round((axis_two-50)*2,2)
+					GuiControl,, axis2_controls_physical_value_%index%, % round(axis_two,2)
 				}
 				
 				; Adjust axis according to invert / deadzone options etc
@@ -446,24 +446,24 @@ Loop{
 				} else {
 					rests := 0
 				}
-				val := AdjustAxis(val,value,rests)
+				axis_one := AdjustAxis(axis_one,value,rests)
 				if (axis2_configured){
 					; Pass opposite of rests to second (merged) axis
 					rests := rests * -1
-					val2 := AdjustAxis(val2,axis_mapping2[index],rests)
+					axis_two := AdjustAxis(axis_two,axis_mapping2[index],rests)
 				}
 				
 				; Display output value, rescale to -100 to +100
-				;GuiControl,, axis1_controls_virtual_value_%index%, % round((val-50)*2,2)
-				GuiControl,, axis1_controls_virtual_value_%index%, % round(val,2)
+				;GuiControl,, axis1_controls_virtual_value_%index%, % round((axis_one-50)*2,2)
+				GuiControl,, axis1_controls_virtual_value_%index%, % round(axis_one,2)
 				if (axis2_configured){
-					;GuiControl,, axis2_controls_virtual_value_%index%, % round((val2-50)*2,2)
-					GuiControl,, axis2_controls_virtual_value_%index%, % round(val2,2)
+					;GuiControl,, axis2_controls_virtual_value_%index%, % round((axis_two-50)*2,2)
+					GuiControl,, axis2_controls_virtual_value_%index%, % round(axis_two,2)
 				}
 				; Move slider to show input value
-				GuiControl,, axis1_controls_state_slider_%index%, % val
+				GuiControl,, axis1_controls_state_slider_%index%, % axis_one
 				if (axis2_configured){
-					GuiControl,, axis2_controls_state_slider_%index%, % val2
+					GuiControl,, axis2_controls_state_slider_%index%, % axis_two
 				}
 				; Set the value for this axis on the virtual stick
 				axismap := axis_list_vjoy[index]
@@ -473,43 +473,45 @@ Loop{
 				; risky assumptions (low/high "no deflection" setting, when could be implied from "Rests" setting)
 				; Nasty use of vars...
 
-				tmp1 := val
-				tmp2 := val2
+				tmp1 := axis_one
+				tmp2 := axis_two
 
 				; rescale to vJoy style 0->32768
-				val := val * ahk_vjoy_factor
-				val2 := val2 * ahk_vjoy_factor
+				axis_one := AHKToVjoy(axis_one)
+				axis_two := AHKToVjoy(axis_two)
 				
 				ax := value.axis
 				if (merge){
+					; Merge mode - axis_two will be used for the output value
 					if (merge == 1){
 						; Standard merge
-						val2 := (val + val2) / 2
+						axis_two := (axis_one + axis_two) / 2
 					} else if (merge == 2){
 						; "Greatest" merge
-						if (axis1_controls_special_%index% == "None"){
-							if (abs(tmp1 - 50) > abs(tmp2 - 50)){
-								val2 := val
-							}
+						if (axis1_controls_special_%index% == "None"){ ; This code only deals with "mid" resting axes for now
+							if ( abs(AHKToZeroCentered(tmp1)) > abs(AHKToZeroCentered(tmp2)) ){
+								; If the 1st axis is deflected by more than the 2nd axis
+								axis_two := axis_one
+							} else {}
 						} else {
 							if (value.invert == -1){
 								; low value is no deflection
-								def1 := val
+								def1 := axis_one
 							} else {
 								; high value is no deflection
-								def1 := vjoy_max - val
+								def1 := vjoy_max - axis_one
 							}
 							if (axis_mapping2[index].invert == -1){
 								; low value is no deflection
-								def2 := val2
+								def2 := axis_two
 							} else {
 								; high value is no deflection
-								def2 := vjoy_max - val2
+								def2 := vjoy_max - axis_two
 							}
 							if (def1 > def2){
-								val2 := val / 2
+								axis_two := axis_one / 2
 							} else {
-								val2 := vjoy_mid + (val2 / 2)
+								axis_two := vjoy_mid + (axis_two / 2)
 							}
 						}
 						;msgbox % axis1_controls_special_%index%
@@ -517,16 +519,16 @@ Loop{
 						;axis_1_controls_special_
 					} else if (merge == 3){
 						; "Trim" merge
-						val  :=  val / vjoy_max
-						val2 := val2 / vjoy_max
-						val2 := val2 *.5 + .25
-						a := 2 - 4*val2
-						b := 4*val2 - 1
-						val2 := vjoy_max * (a*val*val + b*val)
+						axis_one  :=  axis_one / vjoy_max
+						axis_two := axis_two / vjoy_max
+						axis_two := axis_two *.5 + .25
+						a := 2 - 4*axis_two
+						b := 4*axis_two - 1
+						axis_two := vjoy_max * (a*axis_one*axis_one + b*axis_one)
 					}
-					VJoy_SetAxis(val2, vjoy_id, HID_USAGE_%axismap%)
+					VJoy_SetAxis(axis_two, vjoy_id, HID_USAGE_%axismap%)
 				} else {
-					VJoy_SetAxis(val, vjoy_id, HID_USAGE_%axismap%)
+					VJoy_SetAxis(axis_one, vjoy_id, HID_USAGE_%axismap%)
 				}
 
 			} else {
@@ -574,6 +576,28 @@ return
 
 ; ============================================================================================
 ; FUNCTIONS
+
+; Takes an AHK joystick range (0 -> 100) and zero-centers it (-50 -> +50)
+AHKToZeroCentered(val){
+	return val - 50
+}
+
+ZeroCenteredToAHK(val){
+	return val + 50
+}
+
+; Takes an AHK joystick range (0 -> 100) and converts it to a vjoy range (0 -> 32768)
+AHKToVjoy(val){
+	global ahk_vjoy_factor
+
+	return val * ahk_vjoy_factor
+}
+
+VjoyToAHK(val){
+	global ahk_vjoy_factor
+
+	return val / ahk_vjoy_factor
+}
 
 ; Make adjustments to axis based upon settings
 AdjustAxis(input,settings,rests){
