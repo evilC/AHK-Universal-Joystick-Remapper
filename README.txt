@@ -81,7 +81,7 @@ Advanced
 --------
 
 Source code:
-The ujr.ahk file in the zip is the source code. In order to use this, you will also need my ADHD library.
+The ujr.ahk file in the zip is the source code. In order to use this, you will also need my ADHD library and the vJoy library.
 
 "Rest" settings:
 On the Axis 1 tab in the "Special Operations" column, the "Rest H/L" settings do the following:
