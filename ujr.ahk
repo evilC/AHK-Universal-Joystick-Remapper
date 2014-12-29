@@ -701,23 +701,17 @@ PovToAngle(pov){
 ; Calculates whether a u/d/l/r value matches a pov (0-7) value
 ; eg Up ("u") is pov angle 0, but pov 7 (up left) and 1 (up right) also mean "up" is held
 PovMatchesAngle(pov,angle){
-	; pov = 0-7 or -1
-	; angle = u,d,l,r or -1
-	if (angle == "u"){
-		if (pov == 7 || pov == 0 || pov == 1){
-			return 1
-		}
-	} else if (angle == "d"){
-		if (pov >= 3 && pov <= 5){
-			return 1
-		}	
-	} else if (angle == "l"){
-		if (pov >= 5 && pov <= 7){
-			return 1
-		}
-	} else if (angle == "r"){
-		if (pov >= 1 && pov <= 3){
-			return 1
+	static angles := ["u","d","l","r"]
+	static matches := [[7,0,1],[3,4,5],[5,6,7],[1,2,3]]
+
+	Loop % angles.MaxIndex() {
+		a := A_Index
+		if (angle = angles[a]){
+			Loop % matches[a].MaxIndex() {
+				if (pov == matches[a][A_Index]){
+					return 1
+				}
+			}
 		}
 	}
 	return 0
