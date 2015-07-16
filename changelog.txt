@@ -6,6 +6,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+6.7 - 16th July 2015
+= Greatest mode now works in a  more logical manner - it should now behave similarly to Merge mode.
+= CPU load reduced - GUI controls for axes that are not being used are no longer continually updated.
+
 6.6 - 24th Dec 2014
 ! Now tries to use the vJoy DLLs from the vJoy installation folder.
   PLEASE ENSURE YOU ARE USING THE LATEST VERSION OF VJOY!

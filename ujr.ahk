@@ -7,12 +7,14 @@ Before next release:
 
 Known Issues:
 * QuickBind may behave weirdly when running multiple copies as the same binding would trigger multiple times (once for each copy).
+* Split L/H does not work together with Deadzone settings
 
 Features:
 
 Long-term:
-
+* Reduce string comparisons, eg checking DDLs to see if they are "None".
 * Make QuickBind settings persistent? Per-Profile?
+
 */
 
 #SingleInstance Off
@@ -406,6 +408,10 @@ Loop{
 		; Cycle through rows. MAY NOT BE IN ORDER OF VIRTUAL AXES!
 		For index, value in axis_mapping1 {
 			if (value.exists && vjoy_ready){
+				if (axis_mapping1[index].id == "None"){
+					; Do not update axis if Physical Stick ID is set to "None"
+					continue
+				}
 				
 				; Main section for active axes
 				; Get input value
@@ -539,9 +545,7 @@ Loop{
 
 			} else {
 				; Blank out unused axes
-				GuiControl,, axis1_controls_physical_value_%index%, 
-				GuiControl,, axis1_controls_virtual_value_%index%, 
-				GuiControl,, axis1_controls_state_slider_%index%, 50
+				DisableAxis(index)
 			}
 			
 		}
@@ -582,6 +586,13 @@ return
 
 ; ============================================================================================
 ; FUNCTIONS
+
+DisableAxis(index){
+	global
+	GuiControl,, axis1_controls_physical_value_%index%, 
+	GuiControl,, axis1_controls_virtual_value_%index%, 
+	GuiControl,, axis1_controls_state_slider_%index%, 50
+}
 
 ; Takes an AHK joystick range (0 -> 100) and zero-centers it (-50 -> +50)
 AHKToZeroCentered(val){
@@ -903,6 +914,9 @@ option_changed_hook(){
 			axis_mapping%map%[A_Index].special := axis%map%_controls_special_%A_Index%
 
 			axis_mapping%map%[A_Index].id := axis%map%_controls_physical_stick_id_%A_Index%
+			if (map == 1 && axis_mapping%map%[A_Index].id == "None"){
+				DisableAxis(A_Index)
+			}
 
 			axis_mapping%map%[A_Index].axis := axis%map%_controls_physical_axis_%A_Index%
 			
