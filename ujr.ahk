@@ -16,6 +16,7 @@ Long-term:
 */
 
 #SingleInstance Off
+;#include <USkin>
 
 ; Create an instance of the library
 ADHD := New ADHDLib
@@ -31,12 +32,12 @@ ADHD.run_as_admin()
 ; Also you should generally not delete things here - set them to a different value instead
 
 ; You may need to edit these depending on game
-SendMode, Event
+;SendMode, Event
 SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "6.6", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a> / <a href=""https://github.com/evilC/AHK-Universal-Joystick-Remapper/issues"">Bug Tracker</a> / <a href=""http://ahkscript.org/boards/viewtopic.php?f=19&t=5671"">Forum Thread</a>"})
+ADHD.config_about({name: "UJR", version: "6.7", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a> / <a href=""https://github.com/evilC/AHK-Universal-Joystick-Remapper/issues"">Bug Tracker</a> / <a href=""http://ahkscript.org/boards/viewtopic.php?f=19&t=5671"">Forum Thread</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 
@@ -69,6 +70,7 @@ ADHD.config_event("on_exit", "on_exit_hook")
 ;ADHD.config_event("resolution_changed", "resolution_changed_hook")
 
 ; Add custom tabs
+;ADHD.config_tabs(Array("Axes 1", "Axes 2", "Btns1", "Btns2", "Btns3", "Btns4", "Hats"))
 ADHD.config_tabs(Array("Axes 1", "Axes 2", "Buttons 1", "Buttons 2", "Hats"))
 
 ; Init ADHD
@@ -480,6 +482,7 @@ Loop{
 						out := (axis_one + axis_two) / 2
 					} else if (merge == 2){
 						; "Greatest" merge
+						/*
 						if (axis1_controls_special_%index% == "None"){
 							; Rests Middle
 							if ( axis_two > axis_one ){
@@ -508,6 +511,17 @@ Loop{
 							} else {
 								out := vjoy_mid + (axis_two / 2)
 							}
+						}
+						*/
+						tmp := (vjoy_max - axis_one)
+						if (tmp > axis_two){
+							; Axis 1 is more deflected
+							;ToolTip % "* " tmp " | " axis_two
+							out := vjoy_mid - ( (vjoy_max - axis_one) / 2)
+						} else {
+							; Axis 2 is more deflected
+							;ToolTip % tmp " | * " axis_two
+							out := vjoy_mid + (axis_two / 2)
 						}
 					} else if (merge == 3){
 						; "Trim" merge
