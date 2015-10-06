@@ -39,7 +39,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "UJR", version: "6.7", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a> / <a href=""https://github.com/evilC/AHK-Universal-Joystick-Remapper/issues"">Bug Tracker</a> / <a href=""http://ahkscript.org/boards/viewtopic.php?f=19&t=5671"">Forum Thread</a>"})
+ADHD.config_about({name: "UJR", version: "6.8", author: "evilC", link: "<a href=""http://evilc.com/proj/ujr"">Homepage</a> / <a href=""https://github.com/evilC/AHK-Universal-Joystick-Remapper/issues"">Bug Tracker</a> / <a href=""http://ahkscript.org/boards/viewtopic.php?f=19&t=5671"">Forum Thread</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 
@@ -404,7 +404,7 @@ Loop{
 		vjoy_id := 0
 		option_changed_hook()
 	}
-	if (!quick_bind_mode){
+	if (ADHD.private.functionality_enabled && !quick_bind_mode){
 		; Cycle through rows. MAY NOT BE IN ORDER OF VIRTUAL AXES!
 		For index, value in axis_mapping1 {
 			if (value.exists && vjoy_ready){
@@ -1251,7 +1251,7 @@ quickbind_select(){
 	}
 }
 
-quickbind_selected()(){
+quickbind_selected(){
 	soundbeep, 750
 	return
 }
