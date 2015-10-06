@@ -6,6 +6,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+6.8 - 6th Oct 2015
+= Functionality Toggle binding now works. You can turn on/off UJR's functionality with this binding.
+
 6.7 - 16th July 2015
 = Greatest mode now works in a  more logical manner - it should now behave similarly to Merge mode.
 = CPU load reduced - GUI controls for axes that are not being used are no longer continually updated.
