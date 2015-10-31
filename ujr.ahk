@@ -428,8 +428,8 @@ Loop{
 					} else if (axis_mapping2[index].special == "Linear"){
 						merge := 4
 					} else if (axis_mapping2[index].special == "Both"){
-                        merge := 5
-                    }
+                        			merge := 5
+                			}
 				} else {
 					merge := 0
 				}
@@ -546,11 +546,11 @@ Loop{
 							out := axis_two
 						}
 					} else if (merge == 5){
-                        ; "Both" merge - sends lowest value of both axes
-                        if (axis_one >= axis_two){
-                            out := axis_two
-                        }   ; else axis_two is higher, so we default to out := axis_one
-                    }
+                        			; "Both" merge - sends lowest value of both axes
+                        			if (axis_one >= axis_two){
+                        				out := axis_two
+                        			}   ; else axis_two is higher, so we default to out := axis_one
+                			}
 					VJoy_SetAxis(out, vjoy_id, HID_USAGE_%axismap%)
 				} else {
 					VJoy_SetAxis(axis_one, vjoy_id, HID_USAGE_%axismap%)
