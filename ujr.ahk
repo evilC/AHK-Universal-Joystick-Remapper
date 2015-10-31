@@ -173,8 +173,8 @@ Loop, 2 {
 			tmp := "None|Rests H|Rests L|Split H|Split L"
 			axis%tabnum%_controls_special_%A_Index%_TT := "Special Operations:`nRests (Low/High) - Makes Deadzone etc treat the high/low end of the axis as neutral.`nSplit (Low/High) - Uses only the low/high end of the physical axis."
 		} else {
-			tmp := "None|Merge|Greatest|Trim|Linear"
-			axis%tabnum%_controls_special_%A_Index%_TT := "Enables merging with axis " A_Index " on tab 'Axes 1'.`nMerge - A standard average of the two inputs.`nGreatest - whichever input is deflected the most.`nTrim - shift axis 1 center by axis 2."
+			tmp := "None|Merge|Greatest|Trim|Linear|Both"
+			axis%tabnum%_controls_special_%A_Index%_TT := "Enables merging with axis " A_Index " on tab 'Axes 1'.`nMerge - A standard average of the two inputs.`nGreatest - Whichever input is deflected the most from center.`nTrim - Shift axis 1 center by axis 2.`nLinear - Combine axes and use greatest value.`nBoth - Only moves when both axes pressed."
 		}
 		ADHD.gui_add("DropDownList", "axis" tabnum "_controls_special_" A_Index, "x55 y" ypos " w65 h20 R9", tmp, "None")
 		
@@ -427,7 +427,9 @@ Loop{
 						merge := 3
 					} else if (axis_mapping2[index].special == "Linear"){
 						merge := 4
-					}
+					} else if (axis_mapping2[index].special == "Both"){
+                        merge := 5
+                    }
 				} else {
 					merge := 0
 				}
@@ -543,7 +545,12 @@ Loop{
 						if (axis_two > axis_one){
 							out := axis_two
 						}
-					}
+					} else if (merge == 5){
+                        ; "Both" merge - sends lowest value of both axes
+                        if (axis_one >= axis_two){
+                            out := axis_two
+                        }   ; else axis_two is higher, so we default to out := axis_one
+                    }
 					VJoy_SetAxis(out, vjoy_id, HID_USAGE_%axismap%)
 				} else {
 					VJoy_SetAxis(axis_one, vjoy_id, HID_USAGE_%axismap%)
