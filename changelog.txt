@@ -6,6 +6,14 @@ Key:
 = : Change / Fix
 + : Added feature
 
+6.10 - 2nd Nov 2015
++ Compiled with ADHD 3.3.4
+Reverted out change made in 6.9 - UJR would no longer run for many users
+
+6.9 - 8th Oct 2015
++ Compiled with ADHD 3.3.3
+As a result, you should no longer get a UAC prompt every time UJR starts. You should see it once, then it should not appear again.
+
 6.8 - 6th Oct 2015
 = Functionality Toggle binding now works. You can turn on/off UJR's functionality with this binding.
 
